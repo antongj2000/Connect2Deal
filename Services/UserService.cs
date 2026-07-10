@@ -62,7 +62,7 @@ namespace Connect2Deal.Services
                 return null;
             }
 
-            if(BCrypt.Net.BCrypt.Verify(password, user.password_hash))
+            if(!BCrypt.Net.BCrypt.Verify(password, user.password_hash))
             {
             return null;
             }

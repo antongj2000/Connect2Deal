@@ -110,6 +110,18 @@ namespace Connect2Deal.Controllers
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(claimsIdentity));
 
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true
+            };
+
+            
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+
             return RedirectToAction("Privacy", "Home");
         }
 

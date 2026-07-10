@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Connect2Deal.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Connect2Deal.Controllers
@@ -18,6 +19,7 @@ namespace Connect2Deal.Controllers
             return View();
         }
 
+        [Authorize]
         public IActionResult Privacy()
         {
             return View();

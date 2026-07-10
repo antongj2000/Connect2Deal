@@ -53,23 +53,27 @@ namespace Connect2Deal.Services
         #region Login User    
 
 
-        public async Task<bool> LoginCheck(string username, string password)
+        public async Task<user> LoginCheck(string username, string password)
         {
             var user = await mycontext.users.SingleOrDefaultAsync(u => u.username == username);
 
             if (user == null)
             {
-                return false;
+                return null;
             }
 
-            return BCrypt.Net.BCrypt.Verify(password, user.password_hash);
+            if(BCrypt.Net.BCrypt.Verify(password, user.password_hash))
+            {
+            return null;
+            }
+
+            return user;
         }
 
 
+    
 
-
-
-
+        
 
         #endregion
 

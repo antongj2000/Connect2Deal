@@ -12,6 +12,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<UserService>();
 
+builder.Services.AddAuthentication("Cookies")
+    .AddCookie("Cookies");
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,7 +27,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

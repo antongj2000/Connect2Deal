@@ -1,6 +1,7 @@
 using Connect2Deal.Data;
-using Microsoft.EntityFrameworkCore;
 using Connect2Deal.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +13,14 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<UserService>();
 
-builder.Services.AddAuthentication("Cookies")
-    .AddCookie("Cookies");
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.SlidingExpiration = true;
+        options.AccessDeniedPath = "/Account/Login";
+    });
+
 
 var app = builder.Build();
 
@@ -37,5 +44,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

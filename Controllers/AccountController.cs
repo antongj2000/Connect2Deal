@@ -1,7 +1,9 @@
-﻿using Connect2Deal.Services;
-using Microsoft.AspNetCore.Mvc;
+﻿using Connect2Deal.Models;
+using Connect2Deal.Services;
 using Connect2Deal.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Connect2Deal.Controllers
@@ -80,7 +82,9 @@ namespace Connect2Deal.Controllers
                 return View(model);     
             }
 
-            if (!(await _userService.LoginCheck(model.Username, model.Password)))
+            var user = await _userService.LoginCheck(model.Username, model.Password);
+
+            if (user==null)
             {
                 ModelState.AddModelError("Username", "This username doesn't exist or password is wrong");
             }
@@ -89,6 +93,12 @@ namespace Connect2Deal.Controllers
             {
                 return View(model);
             }
+
+            var claims = new List<Claim>
+            {
+            new Claim(ClaimTypes.Name, user.username),
+            new Claim("CoockieUserId", user.id.ToString())
+            };
 
 
             return RedirectToAction("Privacy", "Home");

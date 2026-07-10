@@ -1,6 +1,8 @@
 ﻿using Connect2Deal.Models;
 using Connect2Deal.Services;
 using Connect2Deal.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
@@ -100,6 +102,13 @@ namespace Connect2Deal.Controllers
             new Claim("CoockieUserId", user.id.ToString())
             };
 
+            var claimsIdentity = new ClaimsIdentity(
+            claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            
+            await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity));
 
             return RedirectToAction("Privacy", "Home");
         }

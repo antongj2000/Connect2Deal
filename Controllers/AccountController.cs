@@ -71,6 +71,12 @@ namespace Connect2Deal.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+
             return View();
         }
 
@@ -128,7 +134,12 @@ namespace Connect2Deal.Controllers
 
         #endregion
 
-
+        [HttpPost]
+        public async Task <IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index", "Home");
+        }
 
 
     }

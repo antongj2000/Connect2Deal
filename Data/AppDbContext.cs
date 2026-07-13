@@ -1,105 +1,240 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Connect2Deal.Models;
 using Connect2Deal.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 
 namespace Connect2Deal.Data;
 
 public partial class AppDbContext : DbContext
 {
-    public AppDbContext()
-    {
-    }
-
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }
 
-    public virtual DbSet<category> categories { get; set; }
+    public virtual DbSet<Category> Categories { get; set; }
 
-    public virtual DbSet<listing> listings { get; set; }
+    public virtual DbSet<Listing> Listings { get; set; }
 
-    public virtual DbSet<transaction> transactions { get; set; }
+    public virtual DbSet<Location> Locations { get; set; }
 
-    public virtual DbSet<user> users { get; set; }
+    public virtual DbSet<Transaction> Transactions { get; set; }
 
-    public virtual DbSet<user_rating> user_ratings { get; set; }
+    public virtual DbSet<User> Users { get; set; }
 
-  
+    public virtual DbSet<UserRating> UserRatings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<category>(entity =>
+        modelBuilder.Entity<Category>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("categories_pkey");
+            entity.HasKey(e => e.Id).HasName("categories_pkey");
 
-            entity.HasOne(d => d.parent).WithMany(p => p.Inverseparent).HasConstraintName("fk_categories_parent");
+            entity.ToTable("categories");
+
+            entity.HasIndex(e => e.Slug, "categories_slug_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.Slug)
+                .HasMaxLength(60)
+                .HasColumnName("slug");
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("fk_categories_parent");
         });
 
-        modelBuilder.Entity<listing>(entity =>
+        modelBuilder.Entity<Listing>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("listings_pkey");
+            entity.HasKey(e => e.Id).HasName("listings_pkey");
 
-            entity.Property(e => e.created_at).HasDefaultValueSql("now()");
-            entity.Property(e => e.expires_at).HasDefaultValueSql("(now() + '10 days'::interval)");
-            entity.Property(e => e.status).HasDefaultValueSql("'Active'::character varying");
-            entity.Property(e => e.updated_at).HasDefaultValueSql("now()");
-            entity.Property(e => e.view_count).HasDefaultValue(0);
+            entity.ToTable("listings");
 
-            entity.HasOne(d => d.category).WithMany(p => p.listings)
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Description)
+                .HasMaxLength(2000)
+                .HasColumnName("description");
+            entity.Property(e => e.ExpiresAt)
+                .HasDefaultValueSql("(now() + '10 days'::interval)")
+                .HasColumnName("expires_at");
+            entity.Property(e => e.LocationId).HasColumnName("location_id");
+            entity.Property(e => e.Price)
+                .HasPrecision(12, 2)
+                .HasColumnName("price");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'Active'::character varying")
+                .HasColumnName("status");
+            entity.Property(e => e.Title)
+                .HasMaxLength(120)
+                .HasColumnName("title");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("updated_at");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.ViewCount)
+                .HasDefaultValue(0)
+                .HasColumnName("view_count");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.Listings)
+                .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_listings_category");
 
-            entity.HasOne(d => d.user).WithMany(p => p.listings)
+            entity.HasOne(d => d.Location).WithMany(p => p.Listings)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("listings_location_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Listings)
+                .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_listings_user");
         });
 
-        modelBuilder.Entity<transaction>(entity =>
+        modelBuilder.Entity<Location>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("transactions_pkey");
+            entity.HasKey(e => e.Id).HasName("locations_pkey");
 
-            entity.Property(e => e.created_at).HasDefaultValueSql("now()");
+            entity.ToTable("locations");
 
-            entity.HasOne(d => d.buyer).WithMany(p => p.transactionbuyers)
+            entity.HasIndex(e => e.Slug, "locations_slug_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(80)
+                .HasColumnName("name");
+            entity.Property(e => e.ParentId).HasColumnName("parent_id");
+            entity.Property(e => e.Slug)
+                .HasMaxLength(80)
+                .HasColumnName("slug");
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("locations_parent_id_fkey");
+        });
+
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("transactions_pkey");
+
+            entity.ToTable("transactions");
+
+            entity.HasIndex(e => e.ListingId, "uq_tx_listing").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.BuyerId).HasColumnName("buyer_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ListingId).HasColumnName("listing_id");
+            entity.Property(e => e.SellerId).HasColumnName("seller_id");
+
+            entity.HasOne(d => d.Buyer).WithMany(p => p.TransactionBuyers)
+                .HasForeignKey(d => d.BuyerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_tx_buyer");
 
-            entity.HasOne(d => d.listing).WithOne(p => p.transaction)
+            entity.HasOne(d => d.Listing).WithOne(p => p.Transaction)
+                .HasForeignKey<Transaction>(d => d.ListingId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_tx_listing");
 
-            entity.HasOne(d => d.seller).WithMany(p => p.transactionsellers)
+            entity.HasOne(d => d.Seller).WithMany(p => p.TransactionSellers)
+                .HasForeignKey(d => d.SellerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_tx_seller");
         });
 
-        modelBuilder.Entity<user>(entity =>
+        modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("users_pkey");
+            entity.HasKey(e => e.Id).HasName("users_pkey");
 
-            entity.Property(e => e.created_at).HasDefaultValueSql("now()");
-            entity.Property(e => e.is_blocked).HasDefaultValue(false);
-            entity.Property(e => e.is_email_verified).HasDefaultValue(false);
-            entity.Property(e => e.role).HasDefaultValueSql("'User'::character varying");
+            entity.ToTable("users");
+
+            entity.HasIndex(e => e.Email, "uq_users_email").IsUnique();
+
+            entity.HasIndex(e => e.Username, "uq_users_username").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .HasColumnName("description");
+            entity.Property(e => e.Email)
+                .HasMaxLength(100)
+                .HasColumnName("email");
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(50)
+                .HasColumnName("first_name");
+            entity.Property(e => e.IsBlocked)
+                .HasDefaultValue(false)
+                .HasColumnName("is_blocked");
+            entity.Property(e => e.IsEmailVerified)
+                .HasDefaultValue(false)
+                .HasColumnName("is_email_verified");
+            entity.Property(e => e.LastName)
+                .HasMaxLength(50)
+                .HasColumnName("last_name");
+            entity.Property(e => e.PasswordHash).HasColumnName("password_hash");
+            entity.Property(e => e.PhoneNumber)
+                .HasMaxLength(20)
+                .HasColumnName("phone_number");
+            entity.Property(e => e.ProfileImage)
+                .HasMaxLength(255)
+                .HasColumnName("profile_image");
+            entity.Property(e => e.Role)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("'User'::character varying")
+                .HasColumnName("role");
+            entity.Property(e => e.Username)
+                .HasMaxLength(50)
+                .HasColumnName("username");
         });
 
-        modelBuilder.Entity<user_rating>(entity =>
+        modelBuilder.Entity<UserRating>(entity =>
         {
-            entity.HasKey(e => e.id).HasName("user_ratings_pkey");
+            entity.HasKey(e => e.Id).HasName("user_ratings_pkey");
 
-            entity.Property(e => e.created_at).HasDefaultValueSql("now()");
+            entity.ToTable("user_ratings");
 
-            entity.HasOne(d => d.rated_user).WithMany(p => p.user_ratingrated_users)
+            entity.HasIndex(e => new { e.TransactionId, e.RaterId }, "uq_rating_per_tx").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Comment)
+                .HasMaxLength(500)
+                .HasColumnName("comment");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("now()")
+                .HasColumnName("created_at");
+            entity.Property(e => e.RatedUserId).HasColumnName("rated_user_id");
+            entity.Property(e => e.RaterId).HasColumnName("rater_id");
+            entity.Property(e => e.Score).HasColumnName("score");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
+
+            entity.HasOne(d => d.RatedUser).WithMany(p => p.UserRatingRatedUsers)
+                .HasForeignKey(d => d.RatedUserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_rating_rated");
 
-            entity.HasOne(d => d.rater).WithMany(p => p.user_ratingraters)
+            entity.HasOne(d => d.Rater).WithMany(p => p.UserRatingRaters)
+                .HasForeignKey(d => d.RaterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_rating_rater");
 
-            entity.HasOne(d => d.transaction).WithMany(p => p.user_ratings)
+            entity.HasOne(d => d.Transaction).WithMany(p => p.UserRatings)
+                .HasForeignKey(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_rating_tx");
         });

@@ -1,10 +1,9 @@
-﻿using Connect2Deal.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Connect2Deal.Models;
 
-public partial class Category
+public partial class Location
 {
     public int Id { get; set; }
 
@@ -14,9 +13,9 @@ public partial class Category
 
     public int? ParentId { get; set; }
 
-    public virtual ICollection<Category> InverseParent { get; set; } = new List<Category>();
+    public virtual ICollection<Location> InverseParent { get; set; } = new List<Location>();
 
     public virtual ICollection<Listing> Listings { get; set; } = new List<Listing>();
 
-    public virtual Category? Parent { get; set; }
+    public virtual Location? Parent { get; set; }
 }

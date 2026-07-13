@@ -104,8 +104,8 @@ namespace Connect2Deal.Controllers
 
             var claims = new List<Claim>
             {
-            new Claim(ClaimTypes.Name, user.username),
-            new Claim("CoockieUserId", user.id.ToString())
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim("CoockieUserId", user.Id.ToString())
             };
 
             var claimsIdentity = new ClaimsIdentity(

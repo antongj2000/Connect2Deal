@@ -1,51 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace Connect2Deal.Models;
-
-public partial class listing
+public partial class Listing
 {
-    [Key]
-    public int id { get; set; }
+    public int Id { get; set; }
 
-    public int user_id { get; set; }
+    public int UserId { get; set; }
 
-    public int category_id { get; set; }
+    public int CategoryId { get; set; }
 
-    [StringLength(120)]
-    public string title { get; set; } = null!;
+    public string Title { get; set; } = null!;
 
-    [StringLength(2000)]
-    public string description { get; set; } = null!;
+    public string Description { get; set; } = null!;
 
-    [Precision(12, 2)]
-    public decimal? price { get; set; }
+    public decimal? Price { get; set; }
 
-    [StringLength(80)]
-    public string? city { get; set; }
+    public string Status { get; set; } = null!;
 
-    [StringLength(20)]
-    public string status { get; set; } = null!;
+    public int ViewCount { get; set; }
 
-    public int view_count { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    public DateTime created_at { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
-    public DateTime updated_at { get; set; }
+    public DateTime ExpiresAt { get; set; }
 
-    public DateTime expires_at { get; set; }
+    public int LocationId { get; set; }
 
-    [ForeignKey("category_id")]
-    [InverseProperty("listings")]
-    public virtual category category { get; set; } = null!;
+    public virtual Category Category { get; set; } = null!;
 
-    [InverseProperty("listing")]
-    public virtual transaction? transaction { get; set; }
+    public virtual Location Location { get; set; } = null!;
 
-    [ForeignKey("user_id")]
-    [InverseProperty("listings")]
-    public virtual user user { get; set; } = null!;
+    public virtual Transaction? Transaction { get; set; }
+
+    public virtual User User { get; set; } = null!;
 }

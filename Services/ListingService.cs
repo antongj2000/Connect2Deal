@@ -14,29 +14,35 @@ namespace Connect2Deal.Services
             mycontext = _mycontext;
         }
 
-        public async Task<List<category>> ParentCategoryFetch ()
+        public async Task<List<Category>> ParentCategoryFetch()
         {
-            var parentCat = await mycontext.categories.Where(u => u.parent_id == null).OrderBy(c => c.name).ToListAsync();
-            return parentCat;
+            return await mycontext.Categories
+                .Where(c => c.ParentId == null)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
         }
 
-        public async Task<List<category>> ChildCategoryFetch (int parentId)
+        public async Task<List<Category>> ChildCategoryFetch(int parentId)
         {
-            var childCat = await mycontext.categories.Where(u =>u.parent_id == parentId).OrderBy(c => c.name).ToListAsync();
-            return childCat;
+            return await mycontext.Categories
+                .Where(c => c.ParentId == parentId)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
         }
 
-        //public async Task<bool> IsCategoryValid (int parentId, int childId)
-        //{
-        //    var parentCat = ParentCategoryFetch().Where(u => u.parentId ==  parentId);
-
-        //    if ()
-        //    {
-
-        //    }
+        public async Task<bool> IsCategoryValid(int parentId, int childId)
+        {
+            return await mycontext.Categories
+                .AnyAsync(c => c.Id == childId && c.ParentId == parentId);
         }
+
+
 
 
 
     }
-}
+
+
+
+    }
+

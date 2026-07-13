@@ -1,37 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace Connect2Deal.Models;
 
-[Index("listing_id", Name = "uq_tx_listing", IsUnique = true)]
-public partial class transaction
+public partial class Transaction
 {
-    [Key]
-    public int id { get; set; }
+    public int Id { get; set; }
 
-    public int listing_id { get; set; }
+    public int ListingId { get; set; }
 
-    public int seller_id { get; set; }
+    public int SellerId { get; set; }
 
-    public int buyer_id { get; set; }
+    public int BuyerId { get; set; }
 
-    public DateTime created_at { get; set; }
+    public DateTime CreatedAt { get; set; }
 
-    [ForeignKey("buyer_id")]
-    [InverseProperty("transactionbuyers")]
-    public virtual user buyer { get; set; } = null!;
+    public virtual User Buyer { get; set; } = null!;
 
-    [ForeignKey("listing_id")]
-    [InverseProperty("transaction")]
-    public virtual listing listing { get; set; } = null!;
+    public virtual Listing Listing { get; set; } = null!;
 
-    [ForeignKey("seller_id")]
-    [InverseProperty("transactionsellers")]
-    public virtual user seller { get; set; } = null!;
+    public virtual User Seller { get; set; } = null!;
 
-    [InverseProperty("transaction")]
-    public virtual ICollection<user_rating> user_ratings { get; set; } = new List<user_rating>();
+    public virtual ICollection<UserRating> UserRatings { get; set; } = new List<UserRating>();
 }

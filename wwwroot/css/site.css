@@ -29,3 +29,26 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+body {
+    background-color: #f7f8fa;
+}
+
+.c2d-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+}
+
+.c2d-title {
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+
+.c2d-subtitle {
+    color: #6b7280;
+    font-size: .9rem;
+    margin-bottom: 1.5rem;
+}

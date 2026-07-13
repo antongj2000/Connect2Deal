@@ -62,6 +62,24 @@ namespace Connect2Deal.Services
         }
 
 
+        public async Task<Listing> CreateListing(int userId, int categoryId, int locationId,
+                                         string title, string description, decimal price)
+        {
+            var newListing = new Listing
+            {
+                UserId = userId,
+                CategoryId = categoryId,
+                LocationId = locationId,
+                Title = title,
+                Description = description,
+                Price = price
+            };
+
+            mycontext.Listings.Add(newListing);
+            await mycontext.SaveChangesAsync();
+            return newListing;
+        }
+
 
         #endregion
 

@@ -28,7 +28,6 @@
 
             [Required]
             [Range(1, int.MaxValue, ErrorMessage = "Please choose a sub-category.")]
-            [StringLength(30, MinimumLength = 2)]
             public int ChildCategory { get; set; }
 
 
@@ -40,7 +39,6 @@
 
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Please choose a city.")]
-        [StringLength(30, MinimumLength = 2)]
         public int City { get; set; }
 
 

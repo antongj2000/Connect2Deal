@@ -37,6 +37,37 @@ namespace Connect2Deal.Services
         }
 
 
+        #region Location
+
+        public async Task<List<Location>> CountryFetch()
+        {
+            return await mycontext.Locations
+                .Where(c => c.ParentId == null)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
+
+        public async Task<List<Location>> CityFetch(int parentId)
+        {
+            return await mycontext.Locations
+                .Where(c => c.ParentId == parentId)
+                .OrderBy(c => c.Name)
+                .ToListAsync();
+        }
+
+        public async Task<bool> IsLocationValid(int parentId, int childId)
+        {
+            return await mycontext.Locations
+                .AnyAsync(c => c.Id == childId && c.ParentId == parentId);
+        }
+
+
+
+        #endregion
+
+
+
+
 
 
 
@@ -44,5 +75,5 @@ namespace Connect2Deal.Services
 
 
 
-    }
+}
 

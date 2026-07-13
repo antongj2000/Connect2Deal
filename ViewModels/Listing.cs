@@ -32,7 +32,28 @@
             public int ChildCategory { get; set; }
 
 
-            public List<SelectListItem> ParentCategories { get; set; } = new List<SelectListItem>();
+
+        [Required]
+        [Display(Name = "Country")]
+        [Range(1, int.MaxValue, ErrorMessage = "Please choose a country.")]
+        public int Country { get; set; }
+
+        [Required]
+        [Range(1, int.MaxValue, ErrorMessage = "Please choose a city.")]
+        [StringLength(30, MinimumLength = 2)]
+        public int City { get; set; }
+
+
+
+        public List<SelectListItem> ParentCategories { get; set; } = new List<SelectListItem>();
             public List<SelectListItem> ChildCategories { get; set; } = new List<SelectListItem>();
-        }
+        
+
+
+          public List<SelectListItem> Countries { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> Cities { get; set; } = new List<SelectListItem>();
     }
+
+
+
+}

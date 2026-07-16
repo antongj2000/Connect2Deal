@@ -1,8 +1,556 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<Connect2Deal.Models.Listing>
+@{
+    ViewData["Title"] = "Marketplace";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@*
+    Connect2Deal — marketplace dashboard layout.
+    Model: List<Listing> from GetAllListings() (Category, Location, User included).
+    Sidebar links go to real actions where they exist; the rest are marked
+    "soon" so nothing looks broken. Replace the coloured block in each card
+    with a real <img> once listing images are added.
+*@
+
+<div class="c2d-shell">
+
+    <!-- ============ SIDEBAR ============ -->
+    <aside class="c2d-sidebar">
+        <div class="c2d-brand">
+            <span class="c2d-brand-mark"></span>
+            <div>
+                <div class="c2d-brand-name">Connect2Deal</div>
+                <div class="c2d-brand-tag">Buy &amp; sell, locally</div>
+            </div>
+        </div>
+
+        <nav class="c2d-nav">
+            <div class="c2d-nav-label">Browse</div>
+            <a class="c2d-nav-item is-active" asp-controller="Home" asp-action="Index">
+                <span class="c2d-nav-ico">▤</span> Marketplace
+            </a>
+            <a class="c2d-nav-item" href="#" data-soon="true">
+                <span class="c2d-nav-ico">◎</span> Explore <span class="c2d-soon">soon</span>
+            </a>
+            <a class="c2d-nav-item" href="#" data-soon="true">
+                <span class="c2d-nav-ico">⚑</span> Saved <span class="c2d-soon">soon</span>
+            </a>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <div class="c2d-nav-label">My account</div>
+                <a class="c2d-nav-item" asp-controller="Listing" asp-action="CreateListing">
+                    <span class="c2d-nav-ico">＋</span> Post a listing
+                </a>
+                <a class="c2d-nav-item" href="#" data-soon="true">
+                    <span class="c2d-nav-ico">▦</span> My listings <span class="c2d-soon">soon</span>
+                </a>
+                <a class="c2d-nav-item" href="#" data-soon="true">
+                    <span class="c2d-nav-ico">✉</span> Messages <span class="c2d-soon">soon</span>
+                </a>
+                <a class="c2d-nav-item" href="#" data-soon="true">
+                    <span class="c2d-nav-ico">⚙</span> Settings <span class="c2d-soon">soon</span>
+                </a>
+            }
+        </nav>
+
+        <div class="c2d-sidebar-foot">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                    <button type="submit" class="c2d-nav-item c2d-logout">
+                        <span class="c2d-nav-ico">→</span> Log out
+                    </button>
+                </form>
+            }
+            else
+            {
+                <a class="c2d-nav-item" asp-controller="Account" asp-action="Login">
+                    <span class="c2d-nav-ico">→</span> Log in
+                </a>
+            }
+            <div class="c2d-copy">© 2026 Connect2Deal</div>
+        </div>
+    </aside>
+
+    <!-- ============ MAIN ============ -->
+    <main class="c2d-main">
+
+        <header class="c2d-topbar">
+            <div>
+                <h1 class="c2d-title">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        @($"Welcome back, {User.Identity.Name}")
+                    }
+                    else
+                    {
+                        @:Marketplace
+                    }
+                </h1>
+                <p class="c2d-subtitle">Fresh listings from across Montenegro.</p>
+            </div>
+
+            <a class="c2d-cta" asp-controller="Listing" asp-action="CreateListing">
+                <span>＋</span> Post a listing
+            </a>
+        </header>
+
+        <div class="c2d-section-head">
+            <h2 class="c2d-section-title">Latest listings</h2>
+            <span class="c2d-count">@Model.Count total</span>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="c2d-empty">
+                <div class="c2d-empty-mark">▤</div>
+                <h3>Nothing here yet</h3>
+                <p>Be the first to post something. Your listing shows up right here.</p>
+                <a class="c2d-cta" asp-controller="Listing" asp-action="CreateListing">
+                    <span>＋</span> Post the first listing
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="c2d-grid">
+                @foreach (var listing in Model)
+                {
+                    var cat = listing.Category?.Name ?? "Other";
+                    var hue = (System.Math.Abs(cat.GetHashCode()) % 360);
+                    <article class="c2d-listing">
+
+                        <div class="c2d-thumb" style="--h:@hue">
+                            <span class="c2d-thumb-initial">@cat.Substring(0, 1)</span>
+                            <span class="c2d-thumb-badge">@cat</span>
+                            <span class="c2d-thumb-price">@(listing.Price?.ToString("N0") ?? "0") €</span>
+                        </div>
+
+                        <div class="c2d-listing-body">
+                            <h3 class="c2d-listing-title">@listing.Title</h3>
+
+                            <div class="c2d-meta">
+                                <span class="c2d-meta-loc">◍ @(listing.Location?.Name ?? "—")</span>
+                                <span class="c2d-meta-dot">·</span>
+                                <span class="c2d-meta-date">@listing.CreatedAt.ToString("dd MMM")</span>
+                            </div>
+
+                            <div class="c2d-listing-foot">
+                                <a class="c2d-view"
+                                   asp-controller="Listing" asp-action="Details"
+                                   asp-route-id="@listing.Id">
+                                    View details
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </main>
 </div>
+
+<style>
+    /* ---- scoped to .c2d-shell so it won't fight your Bootstrap ---- */
+    .c2d-shell {
+        --bg: #f4f5fb;
+        --panel: #ffffff;
+        --ink: #171a2b;
+        --muted: #7a7f9a;
+        --line: #eceef6;
+        --brand: #4f46e5;
+        --brand-2: #6366f1;
+        --accent: #10b981;
+        display: grid;
+        grid-template-columns: 248px 1fr;
+        gap: 22px;
+        min-height: calc(100vh - 40px);
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        padding: 20px;
+        margin: -1.5rem; /* cancel the layout container padding */
+        border-radius: 0;
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .c2d-sidebar {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 22px 16px;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 40px);
+    }
+
+    .c2d-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 4px 8px 20px;
+    }
+
+    .c2d-brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        flex: 0 0 auto;
+        background: linear-gradient(135deg, var(--brand), var(--accent));
+    }
+
+    .c2d-brand-name {
+        font-weight: 700;
+        font-size: 1.02rem;
+        letter-spacing: -.2px;
+    }
+
+    .c2d-brand-tag {
+        font-size: .72rem;
+        color: var(--muted);
+    }
+
+    .c2d-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1 1 auto;
+    }
+
+    .c2d-nav-label {
+        font-size: .68rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--muted);
+        margin: 16px 10px 6px;
+    }
+
+    .c2d-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 12px;
+        border-radius: 11px;
+        color: #43485f;
+        text-decoration: none;
+        font-size: .9rem;
+        font-weight: 500;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+    }
+
+        .c2d-nav-item:hover {
+            background: #f3f4fb;
+            color: var(--ink);
+        }
+
+        .c2d-nav-item.is-active {
+            background: linear-gradient(135deg, var(--brand), var(--brand-2));
+            color: #fff;
+            box-shadow: 0 6px 16px -6px var(--brand);
+        }
+
+    .c2d-nav-ico {
+        width: 18px;
+        text-align: center;
+        font-size: .95rem;
+        opacity: .9;
+    }
+
+    .c2d-soon {
+        margin-left: auto;
+        font-size: .62rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--muted);
+        background: #f1f2f9;
+        padding: 2px 7px;
+        border-radius: 20px;
+    }
+
+    .c2d-sidebar-foot {
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+        margin-top: 8px;
+    }
+
+    .c2d-logout:hover {
+        color: #e11d48;
+        background: #fef2f4;
+    }
+
+    .c2d-copy {
+        font-size: .68rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 12px;
+    }
+
+    /* ---------- MAIN ---------- */
+    .c2d-main {
+        min-width: 0;
+    }
+
+    .c2d-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 26px;
+    }
+
+    .c2d-title {
+        font-size: 1.7rem;
+        font-weight: 750;
+        letter-spacing: -.5px;
+        margin: 0;
+    }
+
+    .c2d-subtitle {
+        color: var(--muted);
+        margin: 4px 0 0;
+        font-size: .92rem;
+    }
+
+    .c2d-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .9rem;
+        padding: 11px 18px;
+        border-radius: 12px;
+        box-shadow: 0 10px 22px -10px var(--brand);
+        transition: transform .12s, box-shadow .12s;
+    }
+
+        .c2d-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 26px -10px var(--brand);
+            color: #fff;
+        }
+
+        .c2d-cta span {
+            font-size: 1.05rem;
+            line-height: 0;
+        }
+
+    .c2d-section-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .c2d-section-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .c2d-count {
+        font-size: .8rem;
+        color: var(--muted);
+    }
+
+    /* ---------- GRID (2 per row) ---------- */
+    /* align-items:start stops cards stretching to match the tallest one */
+    .c2d-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .c2d-listing {
+        display: flex;
+        flex-direction: column;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: transform .14s, box-shadow .14s, border-color .14s;
+    }
+
+        .c2d-listing:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 22px 44px -22px rgba(30,34,80,.5);
+            border-color: #dfe2f2;
+        }
+
+    /* IMAGE BLOCK — ~70% of the card (fixed tall area) */
+    .c2d-thumb {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 11;
+        background: radial-gradient(130% 130% at 30% 15%, hsl(var(--h) 85% 66%), hsl(var(--h) 70% 46%));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .c2d-thumb-initial {
+        font-size: 3.4rem;
+        font-weight: 800;
+        color: #fff;
+        opacity: .9;
+        text-shadow: 0 3px 12px rgba(0,0,0,.2);
+    }
+
+    .c2d-thumb-badge {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        background: rgba(255,255,255,.92);
+        color: #2a2d43;
+        font-size: .7rem;
+        font-weight: 600;
+        padding: 4px 11px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
+    }
+    /* price sits on the image, bottom-right, like real marketplace cards */
+    .c2d-thumb-price {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        background: rgba(17,20,43,.82);
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: -.3px;
+        padding: 6px 14px;
+        border-radius: 12px;
+        backdrop-filter: blur(4px);
+    }
+
+    /* INFO BLOCK — ~30% of the card */
+    .c2d-listing-body {
+        padding: 14px 16px 16px;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .c2d-listing-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 0 0 6px;
+        letter-spacing: -.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .c2d-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .78rem;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+
+    .c2d-meta-dot {
+        opacity: .5;
+    }
+
+    .c2d-listing-foot {
+        display: flex;
+    }
+
+    .c2d-view {
+        flex: 1 1 auto;
+        text-align: center;
+        text-decoration: none;
+        font-size: .85rem;
+        font-weight: 600;
+        color: var(--brand);
+        border: 1.5px solid #e2e4f2;
+        padding: 9px 16px;
+        border-radius: 11px;
+        transition: all .13s;
+    }
+
+        .c2d-view:hover {
+            background: var(--brand);
+            border-color: var(--brand);
+            color: #fff;
+        }
+
+    /* ---------- EMPTY ---------- */
+    .c2d-empty {
+        background: var(--panel);
+        border: 1px dashed #d7dae9;
+        border-radius: 18px;
+        padding: 52px 24px;
+        text-align: center;
+    }
+
+    .c2d-empty-mark {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 16px;
+        border-radius: 16px;
+        background: #eef0fb;
+        color: var(--brand);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .c2d-empty h3 {
+        font-weight: 700;
+        margin: 0 0 6px;
+    }
+
+    .c2d-empty p {
+        color: var(--muted);
+        margin: 0 0 18px;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @@media (max-width: 900px) {
+        .c2d-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .c2d-sidebar {
+            position: static;
+            height: auto;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .c2d-nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .c2d-nav-label, .c2d-sidebar-foot {
+            display: none;
+        }
+
+        .c2d-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .c2d-thumb {
+            aspect-ratio: 16 / 10;
+        }
+    }
+</style>

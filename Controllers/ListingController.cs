@@ -120,5 +120,22 @@ namespace Connect2Deal.Controllers
 
 
 
-    }
+        #region Listing fetching from services
+
+
+        //[HttpGet]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> ShowListings()
+        //{
+        //    var model = await _listingService.GetAllListings();
+        //    return View("~/Views/Home/Index.cshtml", model);
+        //}
+
+
+
+            #endregion
+
+
+
+        }
 }

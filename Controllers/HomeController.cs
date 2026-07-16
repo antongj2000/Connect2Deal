@@ -1,23 +1,25 @@
-using System.Diagnostics;
 using Connect2Deal.Models;
+using Connect2Deal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Connect2Deal.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ListingService _listingService;
+
+        public HomeController(ListingService listingService)
         {
-            _logger = logger;
+            _listingService = listingService;
         }
 
-        [AllowAnonymous]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var model = await _listingService.GetAllListings();
+            return View(model);
         }
 
         [Authorize]

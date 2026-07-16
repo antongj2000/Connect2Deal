@@ -27,6 +27,7 @@
             public int ParentCategory { get; set; }
 
             [Required]
+            [Display(Name = "Sub-Category")]
             [Range(1, int.MaxValue, ErrorMessage = "Please choose a sub-category.")]
             public int ChildCategory { get; set; }
 
@@ -44,11 +45,11 @@
 
 
         public List<SelectListItem> ParentCategories { get; set; } = new List<SelectListItem>();
-            public List<SelectListItem> ChildCategories { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> ChildCategories { get; set; } = new List<SelectListItem>();
         
 
 
-          public List<SelectListItem> Countries { get; set; } = new List<SelectListItem>();
+        public List<SelectListItem> Countries { get; set; } = new List<SelectListItem>();
         public List<SelectListItem> Cities { get; set; } = new List<SelectListItem>();
     }
 

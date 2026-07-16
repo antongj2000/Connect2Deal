@@ -1,5 +1,6 @@
 ﻿using Connect2Deal.Data;
 using Connect2Deal.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Connect2Deal.Services
@@ -85,6 +86,27 @@ namespace Connect2Deal.Services
 
 
 
+
+
+
+        #region Listing feed for users
+
+        public async Task<List<Listing>> GetAllListings ()
+        {
+            return await mycontext.Listings.Where(u => u.Status == "Active").
+                Include(l => l.Location).Include(c => c.Category).Include(u => u.User).OrderByDescending(u => u.CreatedAt).ToListAsync();
+        }
+
+
+
+
+
+
+
+        
+
+
+        #endregion
 
 
 

@@ -1,17 +1,20 @@
 ﻿@model List<Connect2Deal.Models.Listing>
 @{
     ViewData["Title"] = "Marketplace";
+    ViewData["HideChrome"] = true;   // this page provides its own navigation via the sidebar
 }
 
 @*
     Connect2Deal — marketplace dashboard layout.
     Model: List<Listing> from GetAllListings() (Category, Location, User included).
-    Sidebar links go to real actions where they exist; the rest are marked
-    "soon" so nothing looks broken. Replace the coloured block in each card
-    with a real <img> once listing images are added.
+    HideChrome hides the _Layout top nav/footer; the sidebar is the navigation.
+    Replace the coloured block in each card with a real <img> once images exist.
 *@
 
-<div class="c2d-shell">
+<div class="c2d-shell" id="c2dShell">
+
+    <!-- click-catcher behind the sidebar on small screens -->
+    <div class="c2d-overlay" id="c2dOverlay"></div>
 
     <!-- ============ SIDEBAR ============ -->
     <aside class="c2d-sidebar">
@@ -76,18 +79,23 @@
     <main class="c2d-main">
 
         <header class="c2d-topbar">
-            <div>
-                <h1 class="c2d-title">
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
-                    {
-                        @($"Welcome back, {User.Identity.Name}")
-                    }
-                    else
-                    {
-                        @:Marketplace
-                    }
-                </h1>
-                <p class="c2d-subtitle">Fresh listings from across Montenegro.</p>
+            <div class="c2d-topbar-left">
+                <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+                <div>
+                    <h1 class="c2d-title">
+                        @if (User.Identity != null && User.Identity.IsAuthenticated)
+                        {
+                            @($"Welcome back, {User.Identity.Name}")
+                        }
+                        else
+                        {
+                            @:Marketplace
+                        }
+                    </h1>
+                    <p class="c2d-subtitle">Fresh listings from across Montenegro.</p>
+                </div>
             </div>
 
             <a class="c2d-cta" asp-controller="Listing" asp-action="CreateListing">
@@ -162,15 +170,80 @@
         --brand-2: #6366f1;
         --accent: #10b981;
         display: grid;
-        grid-template-columns: 248px 1fr;
-        gap: 22px;
-        min-height: calc(100vh - 40px);
+        grid-template-columns: 260px 1fr;
+        gap: 24px;
+        min-height: 100vh;
         background: var(--bg);
         color: var(--ink);
         font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        padding: 20px;
-        margin: -1.5rem; /* cancel the layout container padding */
-        border-radius: 0;
+        padding: 24px 36px 40px;
+        box-sizing: border-box;
+        transition: grid-template-columns .28s ease, gap .28s ease;
+    }
+
+        /* collapsed: sidebar column shrinks to zero, main takes the full width */
+        .c2d-shell.is-collapsed {
+            grid-template-columns: 0fr 1fr;
+            gap: 0;
+        }
+
+            .c2d-shell.is-collapsed .c2d-sidebar {
+                opacity: 0;
+                transform: translateX(-20px);
+                pointer-events: none;
+            }
+
+    /* ---------- HAMBURGER (lives inside the top bar) ---------- */
+    .c2d-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .c2d-burger {
+        flex: 0 0 auto;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: var(--panel);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px -8px rgba(30,34,80,.3);
+        transition: background .15s;
+    }
+
+        .c2d-burger:hover {
+            background: #f3f4fb;
+        }
+
+        .c2d-burger span {
+            display: block;
+            width: 18px;
+            height: 2px;
+            border-radius: 2px;
+            background: var(--ink);
+            transition: transform .28s ease, opacity .2s ease;
+        }
+    /* when sidebar is OPEN, show an X */
+    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+    }
+
+    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+    }
+
+    .c2d-overlay {
+        display: none;
     }
 
     /* ---------- SIDEBAR ---------- */
@@ -182,8 +255,11 @@
         display: flex;
         flex-direction: column;
         position: sticky;
-        top: 20px;
-        height: calc(100vh - 40px);
+        top: 24px;
+        height: calc(100vh - 64px);
+        overflow: hidden;
+        min-width: 0;
+        transition: opacity .22s ease, transform .28s ease;
     }
 
     .c2d-brand {
@@ -522,25 +598,44 @@
 
     /* ---------- RESPONSIVE ---------- */
     @@media (max-width: 900px) {
-        .c2d-shell {
+        /* on small screens the sidebar becomes an overlay drawer */
+        .c2d-shell, .c2d-shell.is-collapsed {
             grid-template-columns: 1fr;
+            gap: 0;
+            padding: 20px;
         }
 
         .c2d-sidebar {
-            position: static;
-            height: auto;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 55;
+            width: 260px;
+            height: 100vh;
+            border-radius: 0;
+            opacity: 1;
+            transform: translateX(0);
         }
 
-        .c2d-nav {
-            flex-direction: row;
-            flex-wrap: wrap;
+        .c2d-shell.is-collapsed .c2d-sidebar {
+            transform: translateX(-110%);
+            opacity: 1;
         }
 
-        .c2d-nav-label, .c2d-sidebar-foot {
-            display: none;
+        .c2d-overlay {
+            display: block;
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            background: rgba(20,22,45,.45);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .25s ease;
+        }
+
+        .c2d-shell:not(.is-collapsed) .c2d-overlay {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .c2d-grid {
@@ -554,3 +649,19 @@
         }
     }
 </style>
+
+@section Scripts {
+    <script>
+        (function () {
+            const shell   = document.getElementById('c2dShell');
+            const burger  = document.getElementById('c2dBurger');
+            const overlay = document.getElementById('c2dOverlay');
+
+            // start collapsed on narrow screens only
+            if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
+
+            burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
+            overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
+        })();
+    </script>
+}

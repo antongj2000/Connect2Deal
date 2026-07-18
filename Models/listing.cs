@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
+
 
 namespace Connect2Deal.Models;
 

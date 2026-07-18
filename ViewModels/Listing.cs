@@ -1,5 +1,6 @@
 ﻿    using Microsoft.AspNetCore.Mvc.Rendering;
     using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
     namespace Connect2Deal.ViewModels
     {
@@ -20,6 +21,9 @@
             [Range(0.01, 9999999.99, ErrorMessage = "Enter a valid price.")]
             public decimal Price { get; set; }
 
+            [Display(Name = "Photos")]
+            public List<IFormFile> Images { get; set; } = new();
+            
 
             [Required]
             [Display(Name = "Category")]

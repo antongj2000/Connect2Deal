@@ -1,5 +1,6 @@
 ﻿using Connect2Deal.Data;
 using Connect2Deal.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -110,6 +111,47 @@ namespace Connect2Deal.Services
                 .Include(l => l.User)
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
+
+        public async Task SaveListingImages(int listingId, List<IFormFile> images, string webRootPath)
+        {
+            var folder = Path.Combine(webRootPath, "uploads", "listings");
+
+            if (!Directory.Exists(folder)) 
+            {
+                Directory.CreateDirectory(folder);
+            }
+
+            bool isFirst = true;
+
+            foreach (var file in images)
+            {
+                if (file.Length == 0) continue;
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var diskPath = Path.Combine(folder, fileName);
+
+                using (var stream = new FileStream(diskPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var image = new ListingImage
+                {
+                    ListingId = listingId,
+                    ImagePath = "/uploads/listings/" + fileName,
+                    IsPrimary = isFirst
+                };
+
+                mycontext.ListingImages.Add(image);
+                isFirst = false;
+            }
+
+            await mycontext.SaveChangesAsync();
+        }
+
+
+
+
 
         #endregion
 

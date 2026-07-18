@@ -120,16 +120,21 @@ namespace Connect2Deal.Controllers
 
 
 
-        #region Listing fetching from services
+        #region Getting listing by Id
 
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ListingDetails (int id)
+        {
+            var model =await _listingService.GetListingById(id);
 
-        //[HttpGet]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> ShowListings()
-        //{
-        //    var model = await _listingService.GetAllListings();
-        //    return View("~/Views/Home/Index.cshtml", model);
-        //}
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return PartialView("_PartialListingDetails", model);
+        }
 
 
 

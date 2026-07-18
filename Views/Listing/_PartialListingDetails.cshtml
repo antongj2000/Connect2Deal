@@ -1,0 +1,51 @@
+﻿@model Connect2Deal.Models.Listing
+
+@{
+    var cat = Model.Category?.Name ?? "Other";
+    var hue = System.Math.Abs(cat.GetHashCode()) % 360;
+}
+
+<div class="c2d-detail-thumb" style="--h:@hue">
+    <span class="c2d-detail-initial">@cat.Substring(0, 1)</span>
+    <span class="c2d-detail-cat">@cat</span>
+</div>
+
+<div class="c2d-detail-body">
+    <div class="c2d-detail-header">
+        <h2 class="c2d-detail-title">@Model.Title</h2>
+        <span class="c2d-detail-price">@(Model.Price?.ToString("N0") ?? "0") €</span>
+    </div>
+
+    <div class="c2d-detail-meta">
+        <span>◍ @(Model.Location?.Name ?? "—")</span>
+        <span>·</span>
+        <span>Posted @Model.CreatedAt.ToString("dd MMM yyyy")</span>
+    </div>
+
+    <hr class="c2d-detail-hr" />
+
+    <div class="c2d-detail-section">
+        <h4>Description</h4>
+        <p class="c2d-detail-desc">@Model.Description</p>
+    </div>
+
+    <hr class="c2d-detail-hr" />
+
+    <div class="c2d-detail-section">
+        <h4>Seller</h4>
+        <div class="c2d-detail-seller">
+            <div class="c2d-detail-avatar">@(Model.User?.Username?.Substring(0, 1).ToUpper() ?? "?")</div>
+            <div>
+                <div class="c2d-detail-seller-name">@(Model.User?.Username ?? "Unknown")</div>
+                <div class="c2d-detail-seller-since">Member since @(Model.User?.CreatedAt.ToString("MMM yyyy"))</div>
+            </div>
+        </div>
+    </div>
+
+    @if (User.Identity != null && User.Identity.IsAuthenticated && Model.User != null)
+    {
+        <div class="c2d-detail-actions">
+            <a href="#" class="c2d-detail-msg" data-soon="true">Message seller</a>
+        </div>
+    }
+</div>

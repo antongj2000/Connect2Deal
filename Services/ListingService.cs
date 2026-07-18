@@ -98,17 +98,20 @@ namespace Connect2Deal.Services
         }
 
 
-
-
-
-
-
-        
-
-
         #endregion
 
 
+        #region Listing details
+        public async Task<Listing?> GetListingById(int id)
+        {
+            return await mycontext.Listings
+                .Include(l => l.Category)
+                .Include(l => l.Location)
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.Id == id);
+        }
+
+        #endregion
 
 
     }

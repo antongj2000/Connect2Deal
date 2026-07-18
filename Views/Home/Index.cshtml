@@ -144,11 +144,9 @@
                             </div>
 
                             <div class="c2d-listing-foot">
-                                <a class="c2d-view"
-                                   asp-controller="Listing" asp-action="Details"
-                                   asp-route-id="@listing.Id">
+                                <button class="c2d-view" data-detail-id="@listing.Id">
                                     View details
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </article>
@@ -156,6 +154,17 @@
             </div>
         }
     </main>
+
+    <!-- ============ DETAIL MODAL ============ -->
+    <div class="c2d-modal-overlay" id="c2dModal">
+        <div class="c2d-modal">
+            <button class="c2d-modal-close" id="c2dModalClose">✕</button>
+            <div class="c2d-modal-content" id="c2dModalContent">
+                <!-- partial loads here -->
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <style>
@@ -596,6 +605,225 @@
         margin: 0 0 18px;
     }
 
+    /* ---------- DETAIL MODAL ---------- */
+    .c2d-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: rgba(15,17,35,.55);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+    }
+
+        .c2d-modal-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+    .c2d-modal {
+        position: relative;
+        background: var(--panel);
+        border-radius: 22px;
+        width: 92%;
+        max-width: 720px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 32px 80px -20px rgba(15,17,40,.55);
+        transform: translateY(24px) scale(.97);
+        transition: transform .3s ease;
+    }
+
+    .c2d-modal-overlay.is-open .c2d-modal {
+        transform: translateY(0) scale(1);
+    }
+
+    .c2d-modal-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 10;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,.85);
+        font-size: 1.1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,.12);
+        transition: background .15s;
+    }
+
+        .c2d-modal-close:hover {
+            background: #fff;
+        }
+
+    .c2d-modal-content {
+    }
+
+    /* loading spinner */
+    .c2d-modal-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 20px;
+        color: var(--muted);
+        font-size: .95rem;
+    }
+
+    /* ---------- DETAIL PARTIAL STYLES ---------- */
+    .c2d-detail-thumb {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border-radius: 22px 22px 0 0;
+        background: radial-gradient(130% 130% at 30% 15%, hsl(var(--h) 85% 66%), hsl(var(--h) 70% 46%));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .c2d-detail-initial {
+        font-size: 4rem;
+        font-weight: 800;
+        color: #fff;
+        opacity: .85;
+        text-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+
+    .c2d-detail-cat {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        background: rgba(255,255,255,.92);
+        color: #2a2d43;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: 5px 14px;
+        border-radius: 20px;
+    }
+
+    .c2d-detail-body {
+        padding: 24px 28px 28px;
+    }
+
+    .c2d-detail-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 8px;
+    }
+
+    .c2d-detail-title {
+        font-size: 1.5rem;
+        font-weight: 750;
+        letter-spacing: -.4px;
+        margin: 0;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .c2d-detail-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--brand);
+        white-space: nowrap;
+        letter-spacing: -.3px;
+    }
+
+    .c2d-detail-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .85rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+    }
+
+    .c2d-detail-hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 18px 0;
+    }
+
+    .c2d-detail-section h4 {
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--muted);
+        margin: 0 0 10px;
+    }
+
+    .c2d-detail-desc {
+        font-size: .95rem;
+        line-height: 1.65;
+        color: #3a3e54;
+        margin: 0;
+        white-space: pre-line;
+    }
+
+    /* seller card */
+    .c2d-detail-seller {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .c2d-detail-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .c2d-detail-seller-name {
+        font-weight: 700;
+        font-size: .95rem;
+    }
+
+    .c2d-detail-seller-since {
+        font-size: .78rem;
+        color: var(--muted);
+    }
+
+    .c2d-detail-actions {
+        margin-top: 22px;
+    }
+
+    .c2d-detail-msg {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .95rem;
+        color: #fff;
+        background: linear-gradient(135deg, var(--brand), var(--brand-2));
+        padding: 13px 20px;
+        border-radius: 13px;
+        box-shadow: 0 10px 22px -10px var(--brand);
+        transition: transform .12s, box-shadow .12s;
+    }
+
+        .c2d-detail-msg:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px -10px var(--brand);
+            color: #fff;
+        }
+
     /* ---------- RESPONSIVE ---------- */
     @@media (max-width: 900px) {
         /* on small screens the sidebar becomes an overlay drawer */
@@ -641,11 +869,22 @@
         .c2d-grid {
             grid-template-columns: 1fr;
         }
+
+        .c2d-modal {
+            width: 96%;
+            max-height: 95vh;
+            border-radius: 16px;
+        }
     }
 
     @@media (max-width: 560px) {
         .c2d-thumb {
             aspect-ratio: 16 / 10;
+        }
+
+        .c2d-detail-header {
+            flex-direction: column;
+            gap: 8px;
         }
     }
 </style>
@@ -653,15 +892,61 @@
 @section Scripts {
     <script>
         (function () {
+            // ---- sidebar toggle ----
             const shell   = document.getElementById('c2dShell');
             const burger  = document.getElementById('c2dBurger');
             const overlay = document.getElementById('c2dOverlay');
 
-            // start collapsed on narrow screens only
             if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
-
             burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
             overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
+
+            // ---- detail modal ----
+            const modal      = document.getElementById('c2dModal');
+            const modalClose = document.getElementById('c2dModalClose');
+            const modalBody  = document.getElementById('c2dModalContent');
+
+            // open: fetch the partial and slide in
+            document.querySelectorAll('[data-detail-id]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-detail-id');
+
+                    // show modal with loading state
+                    modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                    modal.classList.add('is-open');
+                    document.body.style.overflow = 'hidden';
+
+                    // fetch the partial from the server
+                    const response = await fetch(`/Listing/ListingDetails/${id}`);
+                    if (response.ok) {
+                        modalBody.innerHTML = await response.text();
+                    } else {
+                        modalBody.innerHTML = '<div class="c2d-modal-loading">Listing not found.</div>';
+                    }
+                });
+            });
+
+            // close: X button
+            modalClose.addEventListener('click', () => {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            });
+
+            // close: click backdrop
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('is-open');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // close: Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                    modal.classList.remove('is-open');
+                    document.body.style.overflow = '';
+                }
+            });
         })();
     </script>
 }

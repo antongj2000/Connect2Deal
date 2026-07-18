@@ -1,5 +1,4 @@
-﻿using Connect2Deal.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Connect2Deal.Models;

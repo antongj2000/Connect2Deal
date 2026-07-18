@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 
-
 namespace Connect2Deal.Models;
+
 public partial class Listing
 {
     public int Id { get; set; }
@@ -30,6 +30,8 @@ public partial class Listing
     public int LocationId { get; set; }
 
     public virtual Category Category { get; set; } = null!;
+
+    public virtual ICollection<ListingImage> ListingImages { get; set; } = new List<ListingImage>();
 
     public virtual Location Location { get; set; } = null!;
 

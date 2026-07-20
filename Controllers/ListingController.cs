@@ -13,10 +13,14 @@ namespace Connect2Deal.Controllers
     {
 
         private readonly ListingService _listingService;
+        private readonly IWebHostEnvironment _environment;
 
-        public ListingController(ListingService listingService)
+        public ListingController(
+            ListingService listingService,
+            IWebHostEnvironment environment)
         {
             _listingService = listingService;
+            _environment = environment;
         }
 
 
@@ -37,7 +41,7 @@ namespace Connect2Deal.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateListing(Listing model)
+        public async Task<IActionResult> CreateListing(Listing model, List<IFormFile> images)
         {
             if (!await _listingService.IsCategoryValid(model.ParentCategory, model.ChildCategory))
                 ModelState.AddModelError(nameof(model.ChildCategory), "Invalid sub-category.");
@@ -62,7 +66,9 @@ namespace Connect2Deal.Controllers
                 model.City,      
                 model.Title,
                 model.Description,
-                model.Price);
+                model.Price,
+                images, _environment.WebRootPath);
+                
 
             return RedirectToAction("Index", "Home");
         }

@@ -1,4 +1,5 @@
 ﻿@model Connect2Deal.ViewModels.Listing
+
 @{
     ViewData["Title"] = "Post a listing";
 }
@@ -10,7 +11,7 @@
             <h3 class="c2d-title">Post a listing</h3>
             <p class="c2d-subtitle">Fill in the details — your item goes live for 10 days.</p>
 
-            <form asp-action="CreateListing" method="post">
+            <form asp-action="CreateListing" method="post" enctype="multipart/form-data">
 
                 <div class="mb-3">
                     <label asp-for="Title" class="form-label fw-semibold"></label>
@@ -18,110 +19,480 @@
                     <span asp-validation-for="Title" class="text-danger small"></span>
                 </div>
 
+
                 <div class="row">
+
                     <div class="col-md-6 mb-3">
                         <label asp-for="ParentCategory" class="form-label fw-semibold"></label>
-                        <select asp-for="ParentCategory" asp-items="Model.ParentCategories"
-                                id="parentCategory" class="form-select">
+
+                        <select asp-for="ParentCategory"
+                                asp-items="Model.ParentCategories"
+                                id="parentCategory"
+                                class="form-select">
+
                             <option value="">Choose a category</option>
+
                         </select>
-                        <span asp-validation-for="ParentCategory" class="text-danger small"></span>
+
+                        <span asp-validation-for="ParentCategory"
+                              class="text-danger small"></span>
                     </div>
 
+
                     <div class="col-md-6 mb-3">
+
                         <label asp-for="ChildCategory" class="form-label fw-semibold"></label>
-                        <select asp-for="ChildCategory" asp-items="Model.ChildCategories"
-                                id="childCategory" class="form-select" disabled>
+
+                        <select asp-for="ChildCategory"
+                                asp-items="Model.ChildCategories"
+                                id="childCategory"
+                                class="form-select">
+
                             <option value="">Choose a category first</option>
+
                         </select>
-                        <span asp-validation-for="ChildCategory" class="text-danger small"></span>
+
+                        <span asp-validation-for="ChildCategory"
+                              class="text-danger small"></span>
+
                     </div>
+
                 </div>
+
+
 
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Country" class="form-label fw-semibold"></label>
-                        <select asp-for="Country" asp-items="Model.Countries"
-                                id="country" class="form-select">
-                            <option value="">Choose a country</option>
-                        </select>
-                        <span asp-validation-for="Country" class="text-danger small"></span>
-                    </div>
 
                     <div class="col-md-6 mb-3">
-                        <label asp-for="City" class="form-label fw-semibold"></label>
-                        <select asp-for="City" asp-items="Model.Cities"
-                                id="city" class="form-select" disabled>
-                            <option value="">Choose a country first</option>
+
+                        <label asp-for="Country" class="form-label fw-semibold"></label>
+
+                        <select asp-for="Country"
+                                asp-items="Model.Countries"
+                                id="country"
+                                class="form-select">
+
+                            <option value="">Choose a country</option>
+
                         </select>
-                        <span asp-validation-for="City" class="text-danger small"></span>
+
+                        <span asp-validation-for="Country"
+                              class="text-danger small"></span>
+
                     </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="City" class="form-label fw-semibold"></label>
+
+                        <select asp-for="City"
+                                asp-items="Model.Cities"
+                                id="city"
+                                class="form-select">
+
+                            <option value="">Choose a country first</option>
+
+                        </select>
+
+                        <span asp-validation-for="City"
+                              class="text-danger small"></span>
+
+                    </div>
+
                 </div>
+
+
 
                 <div class="mb-3">
-                    <label asp-for="Price" class="form-label fw-semibold"></label>
+
+                    <label asp-for="Price"
+                           class="form-label fw-semibold"></label>
+
                     <div class="input-group">
-                        <input asp-for="Price" class="form-control" placeholder="0.00" />
+
+                        <input asp-for="Price"
+                               class="form-control"
+                               placeholder="0.00" />
+
                         <span class="input-group-text">€</span>
+
                     </div>
-                    <span asp-validation-for="Price" class="text-danger small"></span>
+
+                    <span asp-validation-for="Price"
+                          class="text-danger small"></span>
+
                 </div>
+
+
+
+
+                <div class="mb-3">
+
+                    <label asp-for="Description"
+                           class="form-label fw-semibold"></label>
+
+
+                    <textarea asp-for="Description"
+                              class="form-control"
+                              rows="6"
+                              placeholder="Condition, age, what's included..."></textarea>
+
+
+                    <span asp-validation-for="Description"
+                          class="text-danger small"></span>
+
+                </div>
+
+
+
+
+
+                <!-- MODERN IMAGE UPLOAD -->
 
                 <div class="mb-4">
-                    <label asp-for="Description" class="form-label fw-semibold"></label>
-                    <textarea asp-for="Description" class="form-control" rows="6"
-                              placeholder="Condition, age, what's included..."></textarea>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
+
+                    <label class="form-label fw-semibold">
+                        Images
+                    </label>
+
+
+                    <div class="image-upload-box" id="dropZone">
+
+
+                        <input type="file"
+                               id="imageInput"
+                               name="images"
+                               multiple
+                               accept="image/*"
+                               hidden />
+
+
+                        <div class="upload-content">
+
+                            <i class="bi bi-cloud-arrow-up fs-1"></i>
+
+
+                            <p class="mb-1">
+
+                                <strong>
+                                    Click to upload
+                                </strong>
+
+                                or drag images here
+
+                            </p>
+
+
+                            <small class="text-muted">
+
+                                PNG, JPG up to 5MB each
+
+                            </small>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div id="previewContainer"
+                         class="image-preview-container mt-3">
+                    </div>
+
+
                 </div>
+
+
+
+
 
                 <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4">Publish listing</button>
-                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+
+                        Publish listing
+
+                    </button>
+
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        Cancel
+
+                    </a>
+
                 </div>
 
+
             </form>
+
         </div>
     </div>
 </div>
 
+
+
+
+
 @section Scripts {
+
     <partial name="_ValidationScriptsPartial" />
 
+
     <script>
+
+
+        // CATEGORY + LOCATION DROPDOWNS
+
         function chain(parentId, childId, url) {
+
             const parent = document.getElementById(parentId);
             const child = document.getElementById(childId);
 
+
             async function load(parentValue, selectedId = null) {
-                child.innerHTML = '<option value="">Choose</option>';
+
+
+                child.innerHTML =
+                    '<option value="">Choose</option>';
+
 
                 if (!parentValue) {
+
                     child.disabled = true;
                     return;
+
                 }
 
-                const response = await fetch(`${url}?parentId=${parentValue}`);
-                const items = await response.json();
+
+                const response =
+                    await fetch(`${url}?parentId=${parentValue}`);
+
+
+                const items =
+                    await response.json();
+
+
 
                 items.forEach(item => {
-                    const opt = document.createElement('option');
+
+
+                    const opt =
+                        document.createElement('option');
+
+
                     opt.value = item.id;
+
                     opt.textContent = item.name;
-                    if (selectedId && item.id == selectedId) opt.selected = true;
+
+
+
+                    if (selectedId &&
+                        item.id == selectedId) {
+
+                        opt.selected = true;
+
+                    }
+
+
                     child.appendChild(opt);
+
                 });
 
+
                 child.disabled = false;
+
             }
 
-            parent.addEventListener('change', () => load(parent.value));
+
+
+
+            parent.addEventListener('change', () => {
+
+                load(parent.value);
+
+            });
+
+
 
             if (parent.value) {
+
                 load(parent.value, child.value);
+
             }
+
         }
 
-        chain('parentCategory', 'childCategory', '/Listing/SubCategories');
-        chain('country', 'city', '/Listing/Cities');
+
+
+
+        chain(
+            'parentCategory',
+            'childCategory',
+            '/Listing/SubCategories'
+        );
+
+
+        chain(
+            'country',
+            'city',
+            '/Listing/Cities'
+        );
+
+
+
+
+
+        // IMAGE UPLOAD
+
+
+        const dropZone =
+            document.getElementById("dropZone");
+
+
+        const imageInput =
+            document.getElementById("imageInput");
+
+
+        const previewContainer =
+            document.getElementById("previewContainer");
+
+
+
+        dropZone.addEventListener("click", () => {
+
+            imageInput.click();
+
+        });
+
+
+
+
+        imageInput.addEventListener("change", () => {
+
+            showPreview(imageInput.files);
+
+        });
+
+
+
+
+        dropZone.addEventListener("dragover", e => {
+
+            e.preventDefault();
+
+            dropZone.classList.add("border-primary");
+
+        });
+
+
+
+
+        dropZone.addEventListener("dragleave", () => {
+
+            dropZone.classList.remove("border-primary");
+
+        });
+
+
+
+
+
+        dropZone.addEventListener("drop", e => {
+
+
+            e.preventDefault();
+
+
+            imageInput.files =
+                e.dataTransfer.files;
+
+
+            showPreview(e.dataTransfer.files);
+
+
+        });
+
+
+
+
+
+
+        function showPreview(files) {
+
+
+            previewContainer.innerHTML = "";
+
+
+
+            [...files].forEach(file => {
+
+
+                if (!file.type.startsWith("image/"))
+                    return;
+
+
+
+                const reader =
+                    new FileReader();
+
+
+
+                reader.onload = e => {
+
+
+                    const img =
+                        document.createElement("img");
+
+
+                    img.src =
+                        e.target.result;
+
+
+                    img.className =
+                        "image-preview";
+
+
+
+                    previewContainer.appendChild(img);
+
+
+                };
+
+
+
+                reader.readAsDataURL(file);
+
+
+            });
+
+
+        }
+
+
+
+
+        // ENABLE SELECTS BEFORE SUBMIT
+
+        document.querySelector("form")
+            .addEventListener("submit", function () {
+
+                document
+                    .getElementById("childCategory")
+                    .disabled = false;
+
+
+                document
+                    .getElementById("city")
+                    .disabled = false;
+
+            });
+
+
     </script>
+
 }

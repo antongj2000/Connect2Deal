@@ -3,6 +3,7 @@ using Connect2Deal.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Connect2Deal.Services
 {
@@ -65,7 +66,8 @@ namespace Connect2Deal.Services
 
 
         public async Task<Listing> CreateListing(int userId, int categoryId, int locationId,
-                                         string title, string description, decimal price)
+                                         string title, string description, decimal price,
+                                         List<IFormFile> images, string rootPath)
         {
             var newListing = new Listing
             {
@@ -74,11 +76,14 @@ namespace Connect2Deal.Services
                 LocationId = locationId,
                 Title = title,
                 Description = description,
-                Price = price
+                Price = price,
             };
 
             mycontext.Listings.Add(newListing);
             await mycontext.SaveChangesAsync();
+
+            await SaveListingImages(newListing.Id, images, rootPath);
+
             return newListing;
         }
 
@@ -112,43 +117,48 @@ namespace Connect2Deal.Services
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
 
-        public async Task SaveListingImages(int listingId, List<IFormFile> images, string webRootPath)
-        {
-            var folder = Path.Combine(webRootPath, "uploads", "listings");
 
-            if (!Directory.Exists(folder)) 
+        public async Task SaveListingImages(int idListing, List<IFormFile> images,string rootPath )
+        {
+            var pathFolder = Path.Combine(rootPath, "uploads", "listings", idListing.ToString());
+
+            if (!Directory.Exists(pathFolder))
             {
-                Directory.CreateDirectory(folder);
+                Directory.CreateDirectory(pathFolder);  
             }
 
-            bool isFirst = true;
-
+            bool firstPicture = true;
+              
             foreach (var file in images)
             {
-                if (file.Length == 0) continue;
+                if (file.Length == 0)
+                {
+                    continue;
+                }
 
-                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var diskPath = Path.Combine(folder, fileName);
+                var extension = Path.GetExtension(file.FileName);
+                var fileName = Guid.NewGuid() + extension;
+                var fullPath = Path.Combine(pathFolder, fileName);
 
-                using (var stream = new FileStream(diskPath, FileMode.Create))
+                using (var stream = new FileStream(fullPath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                var image = new ListingImage
+                var image = new ListingImage()
                 {
-                    ListingId = listingId,
-                    ImagePath = "/uploads/listings/" + fileName,
-                    IsPrimary = isFirst
+                    ListingId = idListing,
+                    ImagePath = Path.Combine("uploads", "listings", idListing.ToString() ,fileName),
+                    IsPrimary = firstPicture
                 };
 
                 mycontext.ListingImages.Add(image);
-                isFirst = false;
+                firstPicture = false;
+
             }
-
             await mycontext.SaveChangesAsync();
-        }
 
+        }
 
 
 

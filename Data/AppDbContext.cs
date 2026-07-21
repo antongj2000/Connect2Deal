@@ -89,7 +89,7 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("listing_images_pkey");
 
-            entity.Property(e => e.IsPrimary).HasDefaultValue(false);
+            entity.Property(e => e.IsPrimary).HasDefaultValue(false); 
             entity.Property(e => e.SortOrder).HasDefaultValue(0);
 
             entity.HasOne(d => d.Listing).WithMany(p => p.ListingImages).HasConstraintName("listing_images_listing_id_fkey");

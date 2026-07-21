@@ -39,39 +39,39 @@ namespace Connect2Deal.Controllers
 
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateListing(Listing model, List<IFormFile> images)
-        {
-            if (!await _listingService.IsCategoryValid(model.ParentCategory, model.ChildCategory))
-                ModelState.AddModelError(nameof(model.ChildCategory), "Invalid sub-category.");
-
-            if (!await _listingService.IsLocationValid(model.Country, model.City))
-                ModelState.AddModelError(nameof(model.City), "Invalid city.");
-
-            if (!ModelState.IsValid)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> CreateListing(Listing model, List<IFormFile> images)
             {
-                model.ParentCategories = await BuildParentCategoryList();
-                model.ChildCategories = await BuildChildCategoryList(model.ParentCategory);
-                model.Countries = await BuildParentLocationList();
-                model.Cities = await BuildChildLocationList(model.Country);
-                return View(model);
-            }
+                if (!await _listingService.IsCategoryValid(model.ParentCategory, model.ChildCategory))
+                    ModelState.AddModelError(nameof(model.ChildCategory), "Invalid sub-category.");
 
-            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                if (!await _listingService.IsLocationValid(model.Country, model.City))
+                    ModelState.AddModelError(nameof(model.City), "Invalid city.");
 
-            await _listingService.CreateListing(
-                userId,
-                model.ChildCategory,      
-                model.City,      
-                model.Title,
-                model.Description,
-                model.Price,
-                images, _environment.WebRootPath);
+                if (!ModelState.IsValid)
+                {
+                    model.ParentCategories = await BuildParentCategoryList();
+                    model.ChildCategories = await BuildChildCategoryList(model.ParentCategory);
+                    model.Countries = await BuildParentLocationList();
+                    model.Cities = await BuildChildLocationList(model.Country);
+                    return View(model);
+                }
+
+                int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                await _listingService.CreateListing(
+                    userId,
+                    model.ChildCategory,      
+                    model.City,      
+                    model.Title,
+                    model.Description,
+                    model.Price,
+                    images, _environment.WebRootPath);
                 
 
-            return RedirectToAction("Index", "Home");
-        }
+                return RedirectToAction("Index", "Home");
+            }
 
 
         private async Task<List<SelectListItem>> BuildParentLocationList()

@@ -100,7 +100,11 @@ namespace Connect2Deal.Services
         public async Task<List<Listing>> GetAllListings ()
         {
             return await mycontext.Listings.Where(u => u.Status == "Active").
-                Include(l => l.Location).Include(c => c.Category).Include(u => u.User).OrderByDescending(u => u.CreatedAt).ToListAsync();
+                Include(l => l.Location).
+                Include(c => c.Category).
+                Include(u => u.User).
+                Include(i => i.ListingImages).
+                OrderByDescending(u => u.CreatedAt).ToListAsync();
         }
 
 
@@ -108,12 +112,13 @@ namespace Connect2Deal.Services
 
 
         #region Listing details
-        public async Task<Listing?> GetListingById(int id)
+        public async Task<Listing?> GetListingById(int id)  
         {
             return await mycontext.Listings
                 .Include(l => l.Category)
                 .Include(l => l.Location)
                 .Include(l => l.User)
+                .Include(i => i.ListingImages)
                 .FirstOrDefaultAsync(l => l.Id == id);
         }
 
@@ -148,7 +153,7 @@ namespace Connect2Deal.Services
                 var image = new ListingImage()
                 {
                     ListingId = idListing,
-                    ImagePath = Path.Combine("uploads", "listings", idListing.ToString() ,fileName),
+                    ImagePath = $"/uploads/listings/{idListing}/{fileName}",
                     IsPrimary = firstPicture
                 };
 

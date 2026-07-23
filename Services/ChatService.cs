@@ -83,6 +83,21 @@ namespace Connect2Deal.Services
             return newMessage;
         }
 
+        public async Task<bool> UserBelongToConversation (int userId, int conveId)
+        {
+
+            var check = await mycontext.Conversations.FirstOrDefaultAsync
+                (x => x.Id == conveId && (x.User1Id == userId || x.User2Id == userId));
+
+            if (check == null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+
 
         public async Task<List<Conversation>> GetConversations(int userId)
         {

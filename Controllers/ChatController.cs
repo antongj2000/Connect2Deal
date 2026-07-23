@@ -20,18 +20,64 @@ namespace Connect2Deal.Controllers
         }
 
         [HttpGet]
-        public IActionResult Inbox(int userId)
+        public async Task<IActionResult> Inbox()
         {
-            //var chat = await _chatService.GetConversations(userId);
-
-            return View();
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var conversations = await _chatService.GetConversations(userId);
+            return View(conversations);
         }
 
 
+        //SELECT * FROM conversations 
+        //WHERE user1_id = 5 OR user2_id = 5
+        //ORDER BY last_message_at DESC
+
+        [HttpGet]
+        public async Task<IActionResult> Conversation(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var belongs = await _chatService.UserBelongToConversation(userId, id);
+            if (!belongs)
+            {
+                return Forbid();
+            }
+
+            var messages = await _chatService.GetMessagesFromConversation(id);
+            return View(messages);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Send(int conversationId, string content)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var belongs = await _chatService.UserBelongToConversation(userId, conversationId);
+            if (!belongs)
+            {
+                return Forbid();
+            }
+
+            await _chatService.CreateMessage(conversationId, userId, content);
+            return RedirectToAction("Conversation", new { id = conversationId });
+        }
+
+
+        public async Task<IActionResult> StartConversation(int sellerId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var conversation = await _chatService.GetOrCreateConversation(userId, sellerId);
+
+            return RedirectToAction("Conversation", new { id = conversation.Id });
+
+        }
+    }
 
 
 
 
 
     }
-}

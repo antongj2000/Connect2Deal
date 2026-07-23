@@ -1,4 +1,6 @@
 ﻿@using System.Text.Json
+@using System.Security.Claims
+
 @model Connect2Deal.Models.Listing
 
 @{
@@ -193,8 +195,17 @@ else
 
     @if (User.Identity != null && User.Identity.IsAuthenticated && Model.User != null)
     {
-        <div class="c2d-detail-actions">
-            <a href="#" class="c2d-detail-msg" data-soon="true">Message seller</a>
-        </div>
+        var myId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier));
+
+        if (myId != Model.UserId)
+        {
+            <div class="c2d-detail-actions">
+                <a class="c2d-detail-msg"
+                   asp-controller="Chat" asp-action="StartConversation"
+                   asp-route-sellerId="@Model.UserId">
+                    Message seller
+                </a>
+            </div>
+        }
     }
 </div>

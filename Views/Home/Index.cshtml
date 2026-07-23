@@ -1,81 +1,22 @@
 ﻿@model List<Connect2Deal.Models.Listing>
 @{
     ViewData["Title"] = "Marketplace";
-    ViewData["HideChrome"] = true;   // this page provides its own navigation via the sidebar
+    ViewData["HideChrome"] = true;          // hides the _Layout top nav/footer
+    ViewData["ActivePage"] = "Marketplace"; // tells the sidebar which item to highlight
 }
 
 @*
-    Connect2Deal — marketplace dashboard layout.
-    Model: List<Listing> from GetAllListings() (Category, Location, User included).
-    HideChrome hides the _Layout top nav/footer; the sidebar is the navigation.
-    Replace the coloured block in each card with a real <img> once images exist.
+    Connect2Deal — marketplace feed.
+    Model:   List<Listing> from GetAllListings()
+             (Category, Location, User, ListingImages included).
+    Sidebar: Views/Shared/_Sidebar.cshtml — shared with the Chat pages.
+    CSS:     wwwroot/css/site.css
 *@
 
 <div class="c2d-shell" id="c2dShell">
 
-    <!-- click-catcher behind the sidebar on small screens -->
-    <div class="c2d-overlay" id="c2dOverlay"></div>
+    <partial name="_Sidebar" />
 
-    <!-- ============ SIDEBAR ============ -->
-    <aside class="c2d-sidebar">
-        <div class="c2d-brand">
-            <span class="c2d-brand-mark"></span>
-            <div>
-                <div class="c2d-brand-name">Connect2Deal</div>
-                <div class="c2d-brand-tag">Buy &amp; sell, locally</div>
-            </div>
-        </div>
-
-        <nav class="c2d-nav">
-            <div class="c2d-nav-label">Browse</div>
-            <a class="c2d-nav-item is-active" asp-controller="Home" asp-action="Index">
-                <span class="c2d-nav-ico">▤</span> Marketplace
-            </a>
-            <a class="c2d-nav-item" href="#" data-soon="true">
-                <span class="c2d-nav-ico">◎</span> Explore <span class="c2d-soon">soon</span>
-            </a>
-            <a class="c2d-nav-item" href="#" data-soon="true">
-                <span class="c2d-nav-ico">⚑</span> Saved <span class="c2d-soon">soon</span>
-            </a>
-
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                <div class="c2d-nav-label">My account</div>
-                <a class="c2d-nav-item" asp-controller="Listing" asp-action="CreateListing">
-                    <span class="c2d-nav-ico">＋</span> Post a listing
-                </a>
-                <a class="c2d-nav-item" href="#" data-soon="true">
-                    <span class="c2d-nav-ico">▦</span> My listings <span class="c2d-soon">soon</span>
-                </a>
-                <a class="c2d-nav-item" href="#" data-soon="true">
-                    <span class="c2d-nav-ico">✉</span> Messages <span class="c2d-soon">soon</span>
-                </a>
-                <a class="c2d-nav-item" href="#" data-soon="true">
-                    <span class="c2d-nav-ico">⚙</span> Settings <span class="c2d-soon">soon</span>
-                </a>
-            }
-        </nav>
-
-        <div class="c2d-sidebar-foot">
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                    <button type="submit" class="c2d-nav-item c2d-logout">
-                        <span class="c2d-nav-ico">→</span> Log out
-                    </button>
-                </form>
-            }
-            else
-            {
-                <a class="c2d-nav-item" asp-controller="Account" asp-action="Login">
-                    <span class="c2d-nav-ico">→</span> Log in
-                </a>
-            }
-            <div class="c2d-copy">© 2026 Connect2Deal</div>
-        </div>
-    </aside>
-
-    <!-- ============ MAIN ============ -->
     <main class="c2d-main">
 
         <header class="c2d-topbar">
@@ -125,19 +66,17 @@
                 @foreach (var listing in Model)
                 {
                     var cat = listing.Category?.Name ?? "Other";
-                    var hue = (System.Math.Abs(cat.GetHashCode()) % 360);
-                    <article class="c2d-listing">
+                    var hue = System.Math.Abs(cat.GetHashCode()) % 360;
+                    var thumb = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
+                    ?? listing.ListingImages?.FirstOrDefault();
 
-                        @{
-                            var thumb = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
-                            ?? listing.ListingImages?.FirstOrDefault();
-                        }
+                    <article class="c2d-listing">
 
                         <div class="c2d-thumb" style="--h:@hue">
                             @if (thumb != null)
                             {
                                 <img src="@thumb.ImagePath" alt="@listing.Title"
-                                      style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
+                                     style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
                             }
                             else
                             {
@@ -173,735 +112,12 @@
         <div class="c2d-modal">
             <button class="c2d-modal-close" id="c2dModalClose">✕</button>
             <div class="c2d-modal-content" id="c2dModalContent">
-                <!-- partial loads here -->
+                <!-- the listing detail partial loads in here -->
             </div>
         </div>
     </div>
 
 </div>
-
-<style>
-    /* ---- scoped to .c2d-shell so it won't fight your Bootstrap ---- */
-    .c2d-shell {
-        --bg: #f4f5fb;
-        --panel: #ffffff;
-        --ink: #171a2b;
-        --muted: #7a7f9a;
-        --line: #eceef6;
-        --brand: #4f46e5;
-        --brand-2: #6366f1;
-        --accent: #10b981;
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 24px;
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--ink);
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-        padding: 24px 36px 40px;
-        box-sizing: border-box;
-        transition: grid-template-columns .28s ease, gap .28s ease;
-    }
-
-        /* collapsed: sidebar column shrinks to zero, main takes the full width */
-        .c2d-shell.is-collapsed {
-            grid-template-columns: 0fr 1fr;
-            gap: 0;
-        }
-
-            .c2d-shell.is-collapsed .c2d-sidebar {
-                opacity: 0;
-                transform: translateX(-20px);
-                pointer-events: none;
-            }
-
-    /* ---------- HAMBURGER (lives inside the top bar) ---------- */
-    .c2d-topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .c2d-burger {
-        flex: 0 0 auto;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        border: 1px solid var(--line);
-        background: var(--panel);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        cursor: pointer;
-        box-shadow: 0 4px 14px -8px rgba(30,34,80,.3);
-        transition: background .15s;
-    }
-
-        .c2d-burger:hover {
-            background: #f3f4fb;
-        }
-
-        .c2d-burger span {
-            display: block;
-            width: 18px;
-            height: 2px;
-            border-radius: 2px;
-            background: var(--ink);
-            transition: transform .28s ease, opacity .2s ease;
-        }
-    /* when sidebar is OPEN, show an X */
-    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(1) {
-        transform: translateY(6px) rotate(45deg);
-    }
-
-    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(2) {
-        opacity: 0;
-    }
-
-    .c2d-shell:not(.is-collapsed) .c2d-burger span:nth-child(3) {
-        transform: translateY(-6px) rotate(-45deg);
-    }
-
-    .c2d-overlay {
-        display: none;
-    }
-
-    /* ---------- SIDEBAR ---------- */
-    .c2d-sidebar {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        padding: 22px 16px;
-        display: flex;
-        flex-direction: column;
-        position: sticky;
-        top: 24px;
-        height: calc(100vh - 64px);
-        overflow: hidden;
-        min-width: 0;
-        transition: opacity .22s ease, transform .28s ease;
-    }
-
-    .c2d-brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 4px 8px 20px;
-    }
-
-    .c2d-brand-mark {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        flex: 0 0 auto;
-        background: linear-gradient(135deg, var(--brand), var(--accent));
-    }
-
-    .c2d-brand-name {
-        font-weight: 700;
-        font-size: 1.02rem;
-        letter-spacing: -.2px;
-    }
-
-    .c2d-brand-tag {
-        font-size: .72rem;
-        color: var(--muted);
-    }
-
-    .c2d-nav {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        flex: 1 1 auto;
-    }
-
-    .c2d-nav-label {
-        font-size: .68rem;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: var(--muted);
-        margin: 16px 10px 6px;
-    }
-
-    .c2d-nav-item {
-        display: flex;
-        align-items: center;
-        gap: 11px;
-        padding: 10px 12px;
-        border-radius: 11px;
-        color: #43485f;
-        text-decoration: none;
-        font-size: .9rem;
-        font-weight: 500;
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-        transition: background .15s, color .15s;
-    }
-
-        .c2d-nav-item:hover {
-            background: #f3f4fb;
-            color: var(--ink);
-        }
-
-        .c2d-nav-item.is-active {
-            background: linear-gradient(135deg, var(--brand), var(--brand-2));
-            color: #fff;
-            box-shadow: 0 6px 16px -6px var(--brand);
-        }
-
-    .c2d-nav-ico {
-        width: 18px;
-        text-align: center;
-        font-size: .95rem;
-        opacity: .9;
-    }
-
-    .c2d-soon {
-        margin-left: auto;
-        font-size: .62rem;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        color: var(--muted);
-        background: #f1f2f9;
-        padding: 2px 7px;
-        border-radius: 20px;
-    }
-
-    .c2d-sidebar-foot {
-        border-top: 1px solid var(--line);
-        padding-top: 12px;
-        margin-top: 8px;
-    }
-
-    .c2d-logout:hover {
-        color: #e11d48;
-        background: #fef2f4;
-    }
-
-    .c2d-copy {
-        font-size: .68rem;
-        color: var(--muted);
-        text-align: center;
-        margin-top: 12px;
-    }
-
-    /* ---------- MAIN ---------- */
-    .c2d-main {
-        min-width: 0;
-    }
-
-    .c2d-topbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        flex-wrap: wrap;
-        margin-bottom: 26px;
-    }
-
-    .c2d-title {
-        font-size: 1.7rem;
-        font-weight: 750;
-        letter-spacing: -.5px;
-        margin: 0;
-    }
-
-    .c2d-subtitle {
-        color: var(--muted);
-        margin: 4px 0 0;
-        font-size: .92rem;
-    }
-
-    .c2d-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: linear-gradient(135deg, var(--brand), var(--brand-2));
-        color: #fff;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: .9rem;
-        padding: 11px 18px;
-        border-radius: 12px;
-        box-shadow: 0 10px 22px -10px var(--brand);
-        transition: transform .12s, box-shadow .12s;
-    }
-
-        .c2d-cta:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 26px -10px var(--brand);
-            color: #fff;
-        }
-
-        .c2d-cta span {
-            font-size: 1.05rem;
-            line-height: 0;
-        }
-
-    .c2d-section-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        margin-bottom: 16px;
-    }
-
-    .c2d-section-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .c2d-count {
-        font-size: .8rem;
-        color: var(--muted);
-    }
-
-    /* ---------- GRID (2 per row) ---------- */
-    /* align-items:start stops cards stretching to match the tallest one */
-    .c2d-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 22px;
-        align-items: start;
-    }
-
-    .c2d-listing {
-        display: flex;
-        flex-direction: column;
-        background: var(--panel);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        overflow: hidden;
-        transition: transform .14s, box-shadow .14s, border-color .14s;
-    }
-
-        .c2d-listing:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 22px 44px -22px rgba(30,34,80,.5);
-            border-color: #dfe2f2;
-        }
-
-    /* IMAGE BLOCK — ~70% of the card (fixed tall area) */
-    .c2d-thumb {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 11;
-        overflow: hidden;
-        background: radial-gradient(130% 130% at 30% 15%, hsl(var(--h) 85% 66%), hsl(var(--h) 70% 46%));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .c2d-thumb-initial {
-        font-size: 3.4rem;
-        font-weight: 800;
-        color: #fff;
-        opacity: .9;
-        text-shadow: 0 3px 12px rgba(0,0,0,.2);
-    }
-
-    .c2d-thumb-badge {
-        position: absolute;
-        left: 12px;
-        top: 12px;
-        background: rgba(255,255,255,.92);
-        color: #2a2d43;
-        font-size: .7rem;
-        font-weight: 600;
-        padding: 4px 11px;
-        border-radius: 20px;
-        backdrop-filter: blur(4px);
-    }
-    /* price sits on the image, bottom-right, like real marketplace cards */
-    .c2d-thumb-price {
-        position: absolute;
-        right: 12px;
-        bottom: 12px;
-        background: rgba(17,20,43,.82);
-        color: #fff;
-        font-size: 1.05rem;
-        font-weight: 800;
-        letter-spacing: -.3px;
-        padding: 6px 14px;
-        border-radius: 12px;
-        backdrop-filter: blur(4px);
-    }
-
-    /* INFO BLOCK — ~30% of the card */
-    .c2d-listing-body {
-        padding: 14px 16px 16px;
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-    }
-
-    .c2d-listing-title {
-        font-size: 1.05rem;
-        font-weight: 700;
-        margin: 0 0 6px;
-        letter-spacing: -.2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .c2d-meta {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: .78rem;
-        color: var(--muted);
-        margin-bottom: 12px;
-    }
-
-    .c2d-meta-dot {
-        opacity: .5;
-    }
-
-    .c2d-listing-foot {
-        display: flex;
-    }
-
-    .c2d-view {
-        flex: 1 1 auto;
-        text-align: center;
-        text-decoration: none;
-        font-size: .85rem;
-        font-weight: 600;
-        color: var(--brand);
-        border: 1.5px solid #e2e4f2;
-        padding: 9px 16px;
-        border-radius: 11px;
-        transition: all .13s;
-    }
-
-        .c2d-view:hover {
-            background: var(--brand);
-            border-color: var(--brand);
-            color: #fff;
-        }
-
-    /* ---------- EMPTY ---------- */
-    .c2d-empty {
-        background: var(--panel);
-        border: 1px dashed #d7dae9;
-        border-radius: 18px;
-        padding: 52px 24px;
-        text-align: center;
-    }
-
-    .c2d-empty-mark {
-        width: 56px;
-        height: 56px;
-        margin: 0 auto 16px;
-        border-radius: 16px;
-        background: #eef0fb;
-        color: var(--brand);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    .c2d-empty h3 {
-        font-weight: 700;
-        margin: 0 0 6px;
-    }
-
-    .c2d-empty p {
-        color: var(--muted);
-        margin: 0 0 18px;
-    }
-
-    /* ---------- DETAIL MODAL ---------- */
-    .c2d-modal-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 100;
-        background: rgba(15,17,35,.55);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity .25s ease;
-    }
-
-        .c2d-modal-overlay.is-open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-    .c2d-modal {
-        position: relative;
-        background: var(--panel);
-        border-radius: 22px;
-        width: 92%;
-        max-width: 720px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 32px 80px -20px rgba(15,17,40,.55);
-        transform: translateY(24px) scale(.97);
-        transition: transform .3s ease;
-    }
-
-    .c2d-modal-overlay.is-open .c2d-modal {
-        transform: translateY(0) scale(1);
-    }
-
-    .c2d-modal-close {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        z-index: 10;
-        width: 38px;
-        height: 38px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255,255,255,.85);
-        font-size: 1.1rem;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,.12);
-        transition: background .15s;
-    }
-
-        .c2d-modal-close:hover {
-            background: #fff;
-        }
-
-    .c2d-modal-content {
-    }
-
-    /* loading spinner */
-    .c2d-modal-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 80px 20px;
-        color: var(--muted);
-        font-size: .95rem;
-    }
-
-    /* ---------- DETAIL PARTIAL STYLES ---------- */
-    .c2d-detail-thumb {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        border-radius: 22px 22px 0 0;
-        background: radial-gradient(130% 130% at 30% 15%, hsl(var(--h) 85% 66%), hsl(var(--h) 70% 46%));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .c2d-detail-initial {
-        font-size: 4rem;
-        font-weight: 800;
-        color: #fff;
-        opacity: .85;
-        text-shadow: 0 4px 16px rgba(0,0,0,.2);
-    }
-
-    .c2d-detail-cat {
-        position: absolute;
-        left: 16px;
-        top: 16px;
-        background: rgba(255,255,255,.92);
-        color: #2a2d43;
-        font-size: .78rem;
-        font-weight: 600;
-        padding: 5px 14px;
-        border-radius: 20px;
-    }
-
-    .c2d-detail-body {
-        padding: 24px 28px 28px;
-    }
-
-    .c2d-detail-header {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 8px;
-    }
-
-    .c2d-detail-title {
-        font-size: 1.5rem;
-        font-weight: 750;
-        letter-spacing: -.4px;
-        margin: 0;
-        flex: 1;
-        min-width: 0;
-    }
-
-    .c2d-detail-price {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--brand);
-        white-space: nowrap;
-        letter-spacing: -.3px;
-    }
-
-    .c2d-detail-meta {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: .85rem;
-        color: var(--muted);
-        margin-bottom: 6px;
-    }
-
-    .c2d-detail-hr {
-        border: none;
-        border-top: 1px solid var(--line);
-        margin: 18px 0;
-    }
-
-    .c2d-detail-section h4 {
-        font-size: .78rem;
-        text-transform: uppercase;
-        letter-spacing: .06em;
-        color: var(--muted);
-        margin: 0 0 10px;
-    }
-
-    .c2d-detail-desc {
-        font-size: .95rem;
-        line-height: 1.65;
-        color: #3a3e54;
-        margin: 0;
-        white-space: pre-line;
-    }
-
-    /* seller card */
-    .c2d-detail-seller {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .c2d-detail-avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--brand), var(--brand-2));
-        color: #fff;
-        font-weight: 700;
-        font-size: 1.1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .c2d-detail-seller-name {
-        font-weight: 700;
-        font-size: .95rem;
-    }
-
-    .c2d-detail-seller-since {
-        font-size: .78rem;
-        color: var(--muted);
-    }
-
-    .c2d-detail-actions {
-        margin-top: 22px;
-    }
-
-    .c2d-detail-msg {
-        display: block;
-        text-align: center;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: .95rem;
-        color: #fff;
-        background: linear-gradient(135deg, var(--brand), var(--brand-2));
-        padding: 13px 20px;
-        border-radius: 13px;
-        box-shadow: 0 10px 22px -10px var(--brand);
-        transition: transform .12s, box-shadow .12s;
-    }
-
-        .c2d-detail-msg:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 28px -10px var(--brand);
-            color: #fff;
-        }
-
-    /* ---------- RESPONSIVE ---------- */
-    @@media (max-width: 900px) {
-        /* on small screens the sidebar becomes an overlay drawer */
-        .c2d-shell, .c2d-shell.is-collapsed {
-            grid-template-columns: 1fr;
-            gap: 0;
-            padding: 20px;
-        }
-
-        .c2d-sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 55;
-            width: 260px;
-            height: 100vh;
-            border-radius: 0;
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .c2d-shell.is-collapsed .c2d-sidebar {
-            transform: translateX(-110%);
-            opacity: 1;
-        }
-
-        .c2d-overlay {
-            display: block;
-            position: fixed;
-            inset: 0;
-            z-index: 50;
-            background: rgba(20,22,45,.45);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .25s ease;
-        }
-
-        .c2d-shell:not(.is-collapsed) .c2d-overlay {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .c2d-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .c2d-modal {
-            width: 96%;
-            max-height: 95vh;
-            border-radius: 16px;
-        }
-    }
-
-    @@media (max-width: 560px) {
-        .c2d-thumb {
-            aspect-ratio: 16 / 10;
-        }
-
-        .c2d-detail-header {
-            flex-direction: column;
-            gap: 8px;
-        }
-    }
-</style>
 
 @section Scripts {
     <script>
@@ -913,53 +129,37 @@
 
             if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
             burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
-            overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
+            if (overlay) overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
 
-            // ---- detail modal ----
+            // ---- listing detail modal ----
             const modal      = document.getElementById('c2dModal');
             const modalClose = document.getElementById('c2dModalClose');
             const modalBody  = document.getElementById('c2dModalContent');
 
-            // open: fetch the partial and slide in
+            function closeModal() {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+
             document.querySelectorAll('[data-detail-id]').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const id = btn.getAttribute('data-detail-id');
 
-                    // show modal with loading state
                     modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
                     modal.classList.add('is-open');
                     document.body.style.overflow = 'hidden';
 
-                    // fetch the partial from the server
                     const response = await fetch(`/Listing/ListingDetails/${id}`);
-                    if (response.ok) {
-                        modalBody.innerHTML = await response.text();
-                    } else {
-                        modalBody.innerHTML = '<div class="c2d-modal-loading">Listing not found.</div>';
-                    }
+                    modalBody.innerHTML = response.ok
+                        ? await response.text()
+                        : '<div class="c2d-modal-loading">Listing not found.</div>';
                 });
             });
 
-            // close: X button
-            modalClose.addEventListener('click', () => {
-                modal.classList.remove('is-open');
-                document.body.style.overflow = '';
-            });
-
-            // close: click backdrop
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.classList.remove('is-open');
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // close: Escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('is-open')) {
-                    modal.classList.remove('is-open');
-                    document.body.style.overflow = '';
-                }
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
             });
         })();
     </script>

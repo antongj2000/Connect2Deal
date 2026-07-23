@@ -44,6 +44,9 @@ namespace Connect2Deal.Controllers
             }
 
             var messages = await _chatService.GetMessagesFromConversation(id);
+
+            ViewData["ConversationId"] = id;  
+
             return View(messages);
         }
 

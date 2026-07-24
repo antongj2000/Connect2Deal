@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Http;
 
 
             [Required]
-            [StringLength(30, MinimumLength = 2)]
+            [StringLength(500, MinimumLength = 2)]
             public string Description { get; set; } = string.Empty;
 
             [Required]

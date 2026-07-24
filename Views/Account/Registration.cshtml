@@ -1,42 +1,101 @@
 ﻿@model Connect2Deal.ViewModels.Registration
+@{
+    ViewData["Title"] = "Sign up";
+    ViewData["HideChrome"] = true;
+}
 
-<h1>Register and make your account</h1>
+<div class="c2d-auth">
 
-<form asp-action="Registration" method="post">
+    <!-- ============ LEFT: BRAND ============ -->
+    <div class="c2d-auth-brand">
+        <div class="c2d-auth-logo">
+            <span class="c2d-auth-logo-mark"></span>
+            <span class="c2d-auth-logo-name">Connect2Deal</span>
+        </div>
 
-    <div>
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" />
-        <span asp-validation-for="FirstName"></span>
-    </div>
-    
-    <div>
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" />
-        <span asp-validation-for="LastName"></span>
-    </div>
-    
-    <div>
-        <label asp-for="Username"></label>
-        <input asp-for="Username" />
-        <span asp-validation-for="Username"></span>
-    </div>
-    
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
-    </div>
-    
-    <div>
-        <label asp-for="Password"></label>
-        <input asp-for="Password" />
-        <span asp-validation-for="Password"></span>
+        <div class="c2d-auth-pitch">
+            <h2>Start selling<br />in minutes.</h2>
+            <p>Create an account and post your first listing today. No fees, no commission.</p>
+
+            <ul class="c2d-auth-points">
+                <li>
+                    <span class="c2d-auth-check">✓</span>
+                    Post unlimited listings
+                </li>
+                <li>
+                    <span class="c2d-auth-check">✓</span>
+                    Reach buyers across Montenegro
+                </li>
+                <li>
+                    <span class="c2d-auth-check">✓</span>
+                    Build a reputation with every deal
+                </li>
+            </ul>
+        </div>
+
+        <div class="c2d-auth-foot">© 2026 Connect2Deal</div>
     </div>
 
-    <button type="submit">Register</button>
-</form>
+    <!-- ============ RIGHT: FORM ============ -->
+    <div class="c2d-auth-panel">
+        <div class="c2d-auth-box">
 
+            <a class="c2d-auth-back" asp-controller="Home" asp-action="Index">
+                ‹ Back to marketplace
+            </a>
+
+            <div class="c2d-auth-head">
+                <h1>Create your account</h1>
+                <p>It takes less than a minute.</p>
+            </div>
+
+            <form asp-action="Registration" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="c2d-auth-summary"></div>
+
+                <div class="c2d-auth-row">
+                    <div class="c2d-auth-field">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" placeholder="Marko" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="c2d-auth-error"></span>
+                    </div>
+
+                    <div class="c2d-auth-field">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" placeholder="Marković" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="c2d-auth-error"></span>
+                    </div>
+                </div>
+
+                <div class="c2d-auth-field">
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username" placeholder="markomarkovic" autocomplete="username" />
+                    <span asp-validation-for="Username" class="c2d-auth-error"></span>
+                </div>
+
+                <div class="c2d-auth-field">
+                    <label asp-for="Email"></label>
+                    <input asp-for="Email" type="email" placeholder="marko@example.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="c2d-auth-error"></span>
+                </div>
+
+                <div class="c2d-auth-field">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" type="password" placeholder="••••••••" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="c2d-auth-error"></span>
+                </div>
+
+                <button type="submit" class="c2d-auth-btn">Create account</button>
+            </form>
+
+            <div class="c2d-auth-alt">
+                Already have an account?
+                <a asp-controller="Account" asp-action="Login">Log in</a>
+            </div>
+
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -1048,3 +1048,327 @@ body {
         gap: 8px;
     }
 }
+
+/* ============================================================
+   AUTH PAGES — Login / Registration
+   Dodaj ovo na KRAJ wwwroot/css/site.css
+   ============================================================ */
+
+.c2d-auth {
+    --bg: #f4f5fb;
+    --panel: #ffffff;
+    --ink: #171a2b;
+    --muted: #7a7f9a;
+    --line: #eceef6;
+    --brand: #4f46e5;
+    --brand-2: #6366f1;
+    --accent: #10b981;
+    --danger: #e11d48;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+}
+
+/* ---------- LEFT: BRAND PANEL ---------- */
+.c2d-auth-brand {
+    position: relative;
+    background: linear-gradient(140deg, #4f46e5 0%, #6366f1 45%, #10b981 130%);
+    color: #fff;
+    padding: 56px 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+    /* decorative blobs */
+    .c2d-auth-brand::before,
+    .c2d-auth-brand::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .09);
+        pointer-events: none;
+    }
+
+    .c2d-auth-brand::before {
+        width: 420px;
+        height: 420px;
+        top: -120px;
+        right: -140px;
+    }
+
+    .c2d-auth-brand::after {
+        width: 300px;
+        height: 300px;
+        bottom: -110px;
+        left: -90px;
+    }
+
+.c2d-auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.c2d-auth-logo-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, .22);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, .3);
+    flex: 0 0 auto;
+}
+
+.c2d-auth-logo-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -.2px;
+}
+
+.c2d-auth-pitch {
+    position: relative;
+    z-index: 1;
+    max-width: 420px;
+}
+
+    .c2d-auth-pitch h2 {
+        font-size: 2.2rem;
+        font-weight: 750;
+        line-height: 1.2;
+        letter-spacing: -.8px;
+        margin: 0 0 14px;
+    }
+
+    .c2d-auth-pitch p {
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: .9;
+        margin: 0;
+    }
+
+.c2d-auth-points {
+    list-style: none;
+    padding: 0;
+    margin: 28px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    .c2d-auth-points li {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        font-size: .93rem;
+        opacity: .92;
+    }
+
+.c2d-auth-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .72rem;
+    flex: 0 0 auto;
+}
+
+.c2d-auth-foot {
+    position: relative;
+    z-index: 1;
+    font-size: .78rem;
+    opacity: .7;
+}
+
+/* ---------- RIGHT: FORM PANEL ---------- */
+.c2d-auth-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+}
+
+.c2d-auth-box {
+    width: 100%;
+    max-width: 400px;
+}
+
+.c2d-auth-head {
+    margin-bottom: 30px;
+}
+
+    .c2d-auth-head h1 {
+        font-size: 1.85rem;
+        font-weight: 750;
+        letter-spacing: -.6px;
+        margin: 0 0 6px;
+    }
+
+    .c2d-auth-head p {
+        color: var(--muted);
+        font-size: .93rem;
+        margin: 0;
+    }
+
+.c2d-auth-field {
+    margin-bottom: 18px;
+}
+
+    .c2d-auth-field label {
+        display: block;
+        font-size: .82rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+        color: #43485f;
+    }
+
+    .c2d-auth-field input {
+        width: 100%;
+        border: 1px solid #dfe2f0;
+        border-radius: 12px;
+        padding: 12px 15px;
+        font-size: .94rem;
+        background: var(--panel);
+        outline: none;
+        transition: border-color .15s, box-shadow .15s;
+        box-sizing: border-box;
+    }
+
+        .c2d-auth-field input:focus {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+        }
+
+        .c2d-auth-field input::placeholder {
+            color: #b3b7c9;
+        }
+
+.c2d-auth-error {
+    display: block;
+    color: var(--danger);
+    font-size: .78rem;
+    margin-top: 6px;
+}
+
+.c2d-auth-summary {
+    background: #fef2f4;
+    border: 1px solid #fbd5dd;
+    color: #b81c3e;
+    border-radius: 11px;
+    padding: 11px 14px;
+    font-size: .85rem;
+    margin-bottom: 18px;
+}
+
+    .c2d-auth-summary ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .c2d-auth-summary:empty {
+        display: none;
+    }
+
+.c2d-auth-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--brand), var(--brand-2));
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 13px 20px;
+    font-size: .96rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 10px 24px -10px var(--brand);
+    transition: transform .12s, box-shadow .12s;
+    margin-top: 6px;
+}
+
+    .c2d-auth-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px -10px var(--brand);
+    }
+
+    .c2d-auth-btn:active {
+        transform: translateY(0);
+    }
+
+.c2d-auth-alt {
+    text-align: center;
+    margin-top: 22px;
+    font-size: .88rem;
+    color: var(--muted);
+}
+
+    .c2d-auth-alt a {
+        color: var(--brand);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .c2d-auth-alt a:hover {
+            text-decoration: underline;
+        }
+
+.c2d-auth-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: .85rem;
+    margin-bottom: 24px;
+    transition: color .15s;
+}
+
+    .c2d-auth-back:hover {
+        color: var(--ink);
+    }
+
+/* two fields side by side (registration: first/last name) */
+.c2d-auth-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+    .c2d-auth {
+        grid-template-columns: 1fr;
+    }
+
+    .c2d-auth-brand {
+        padding: 32px 28px;
+        min-height: auto;
+    }
+
+    .c2d-auth-pitch h2 {
+        font-size: 1.6rem;
+    }
+
+    .c2d-auth-points,
+    .c2d-auth-foot {
+        display: none;
+    }
+
+    .c2d-auth-panel {
+        padding: 32px 24px 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .c2d-auth-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+}

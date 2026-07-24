@@ -73,8 +73,75 @@
     </main>
 </div>
 
-@section Scripts {
+    @section Scripts {
     <script>
+        const conversationId = @conversationId;
+        const myId = @myId;
+
+        const chatBody = document.getElementById('chatBody');
+        const chatForm = document.querySelector('.c2d-chat-form');
+        const chatInput = chatForm.querySelector('input[name="content"]');
+
+        // ---------- SignalR ----------
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // 5c — server poziva ovu funkciju kad stigne nova poruka
+        connection.on("ReceiveMessage", function (msg) {
+            addBubble(msg.senderId, msg.content, msg.createdAt);
+        });
+
+        connection.start()
+            .then(function () {
+                console.log("SignalR connected");
+                return connection.invoke("JoinConversation", conversationId);
+            })
+            .catch(function (err) {
+                console.error(err);
+            });
+
+        // ---------- crtanje balončića ----------
+        function addBubble(senderId, content, time) {
+            // ako je bio prazan chat, skloni "No messages yet"
+            const empty = chatBody.querySelector('.c2d-chat-empty');
+            if (empty) empty.remove();
+
+            const isMine = senderId === myId;
+
+            const row = document.createElement('div');
+            row.className = 'c2d-bubble-row' + (isMine ? ' is-mine' : '');
+
+            const bubble = document.createElement('div');
+            bubble.className = 'c2d-bubble ' + (isMine ? 'is-mine' : 'is-theirs');
+            bubble.textContent = content;
+
+            const stamp = document.createElement('span');
+            stamp.className = 'c2d-bubble-time';
+            stamp.textContent = time;
+
+            bubble.appendChild(stamp);
+            row.appendChild(bubble);
+            chatBody.appendChild(row);
+
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        // 5d — forma šalje kroz SignalR umjesto POST-a
+        chatForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            connection.invoke("SendMessage", conversationId, text)
+                .catch(function (err) { console.error(err); });
+
+            chatInput.value = '';
+            chatInput.focus();
+        });
+
+        // ---------- sidebar ----------
         (function () {
             const shell   = document.getElementById('c2dShell');
             const burger  = document.getElementById('c2dBurger');
@@ -84,9 +151,8 @@
             burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
             if (overlay) overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
 
-            // scroll to the newest message
-            const body = document.getElementById('chatBody');
-            if (body) body.scrollTop = body.scrollHeight;
+            chatBody.scrollTop = chatBody.scrollHeight;
         })();
     </script>
+}
 }

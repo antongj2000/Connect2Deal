@@ -23,15 +23,12 @@ namespace Connect2Deal.Hubs
         public async Task JoinConversation(int conversationId)
         {
             int userId = int.Parse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
-            Console.WriteLine($"JOIN: user={userId}, conv={conversationId}");
 
             var belongs = await _chatService.UserBelongToConversation(userId, conversationId);
-            Console.WriteLine($"BELONGS: {belongs}");
 
             if (!belongs) return;
 
             await Groups.AddToGroupAsync(Context.ConnectionId, $"conversation-{conversationId}");
-            Console.WriteLine($"ADDED to conversation-{conversationId}");
         }
 
 
@@ -48,19 +45,26 @@ namespace Connect2Deal.Hubs
 
             await _chatService.CreateMessage(conversationId, userId, content);
 
-            Console.WriteLine($"SENDING to conversation-{conversationId}");
-
             await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", new
             {
             senderId = userId,
             content = content,
             createdAt = DateTime.UtcNow.ToString("HH:mm")
-     });
+             });
+        }
+
+        public async Task MarkRead(int conversationId)
+        {
+            int userId = int.Parse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var belongs = await _chatService.UserBelongToConversation(userId, conversationId);
+            if (!belongs) return;
+
+            await _chatService.MarkAsRead(conversationId, userId);
         }
 
 
-
-
+        
 
 
     }

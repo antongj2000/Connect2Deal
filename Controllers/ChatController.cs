@@ -24,13 +24,15 @@ namespace Connect2Deal.Controllers
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var conversations = await _chatService.GetConversations(userId);
+            var unread = new Dictionary<int, int>();
+            foreach (var conversation in conversations)
+            { 
+                unread[conversation.Id] = await _chatService.CountUnreadMessages(conversation.Id, userId);
+            }
+            ViewData["Unread"] = unread;
             return View(conversations);
         }
 
-
-        //SELECT * FROM conversations 
-        //WHERE user1_id = 5 OR user2_id = 5
-        //ORDER BY last_message_at DESC
 
         [HttpGet]
         public async Task<IActionResult> Conversation(int id)
@@ -44,6 +46,8 @@ namespace Connect2Deal.Controllers
             }
 
             var messages = await _chatService.GetMessagesFromConversation(id);
+
+            await _chatService.MarkAsRead(id, userId);     
 
             ViewData["ConversationId"] = id;  
 

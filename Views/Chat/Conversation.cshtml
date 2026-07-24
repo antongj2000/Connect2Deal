@@ -85,16 +85,28 @@
         // ---------- SignalR ----------
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/chatHub")
+            .withAutomaticReconnect()
             .build();
 
-        // 5c — server poziva ovu funkciju kad stigne nova poruka
+        // server poziva ovu funkciju kad stigne nova poruka
         connection.on("ReceiveMessage", function (msg) {
             addBubble(msg.senderId, msg.content, msg.createdAt);
+
+            // poruka je stigla dok gledam ovu stranicu → pročitana je
+            if (msg.senderId !== myId && document.hasFocus()) {
+                connection.invoke("MarkRead", conversationId)
+                    .catch(function (err) { console.error(err); });
+            }
+        });
+
+        // veza se vratila nakon prekida → nova žica, mora ponovo u grupu
+        connection.onreconnected(function () {
+            connection.invoke("JoinConversation", conversationId)
+                .catch(function (err) { console.error(err); });
         });
 
         connection.start()
             .then(function () {
-                console.log("SignalR connected");
                 return connection.invoke("JoinConversation", conversationId);
             })
             .catch(function (err) {
@@ -103,7 +115,6 @@
 
         // ---------- crtanje balončića ----------
         function addBubble(senderId, content, time) {
-            // ako je bio prazan chat, skloni "No messages yet"
             const empty = chatBody.querySelector('.c2d-chat-empty');
             if (empty) empty.remove();
 
@@ -127,7 +138,7 @@
             chatBody.scrollTop = chatBody.scrollHeight;
         }
 
-        // 5d — forma šalje kroz SignalR umjesto POST-a
+        // ---------- slanje poruke ----------
         chatForm.addEventListener('submit', function (e) {
             e.preventDefault();
 

@@ -6,6 +6,7 @@
     ViewData["ActivePage"] = "Messages";
 
     int myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+    var unread = ViewData["Unread"] as Dictionary<int, int> ?? new();
 }
 
 <div class="c2d-shell" id="c2dShell">
@@ -51,14 +52,23 @@
                     var name = otherUser?.Username ?? "Unknown";
                     var initial = name.Substring(0, 1).ToUpper();
                     var when = conv.LastMessageAt?.ToString("dd MMM, HH:mm") ?? "No messages yet";
+                    var unreadCount = unread.GetValueOrDefault(conv.Id, 0);
 
                     <a class="c2d-inbox-item"
                        asp-controller="Chat" asp-action="Conversation" asp-route-id="@conv.Id">
+
                         <div class="c2d-inbox-avatar">@initial</div>
+
                         <div class="c2d-inbox-info">
-                            <div class="c2d-inbox-name">@name</div>
+                            <div class="c2d-inbox-name @(unreadCount > 0 ? "is-unread" : "")">@name</div>
                             <div class="c2d-inbox-preview">@when</div>
                         </div>
+
+                        @if (unreadCount > 0)
+                        {
+                            <span class="c2d-inbox-badge">@unreadCount</span>
+                        }
+
                         <span class="c2d-inbox-time">›</span>
                     </a>
                 }

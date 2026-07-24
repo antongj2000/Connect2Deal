@@ -2,6 +2,7 @@
 using Connect2Deal.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 
 namespace Connect2Deal.Services
 {
@@ -119,15 +120,50 @@ namespace Connect2Deal.Services
         }
 
 
-        //public async Task<List<Listing>> GetAllListings()
-        //{
-        //    return await mycontext.Listings.Where(u => u.Status == "Active").
-        //        Include(l => l.Location).
-        //        Include(c => c.Category).
-        //        Include(u => u.User).
-        //        Include(i => i.ListingImages).
-        //        OrderByDescending(u => u.CreatedAt).ToListAsync();
-        //}
+        public async Task MarkAsRead (int convId, int userId)
+        {
+
+            var messages = await mycontext.Messages.Where(x=>x.ConversationId == convId
+                                                    && x.ReadAt == null && x.SenderId != userId).ToListAsync();
+
+            foreach (var mssg in messages)
+            {
+                mssg.ReadAt = DateTime.UtcNow;
+            }
+
+            await mycontext.SaveChangesAsync();
+        }
+
+
+        public async Task<int> CountUnreadMessages(int convId, int userId)
+        {
+            return await mycontext.Messages.CountAsync(x => x.SenderId != userId && x.ConversationId == convId && x.ReadAt == null);
+        }
+
+        #endregion
+
+
+        #region Inbox live chat logig
+
+        public async Task<int?> GetOtherUserId(int conversationId, int myUserId)
+        {
+            var conversation = await mycontext.Conversations
+                .FirstOrDefaultAsync(c => c.Id == conversationId);
+
+            if (conversation == null)
+            {
+                return null;
+            }
+
+            if (conversation.User1Id == myUserId)
+            {
+                return conversation.User2Id;
+            }
+            else
+            {
+                return conversation.User1Id;
+            }
+        }
 
 
         #endregion

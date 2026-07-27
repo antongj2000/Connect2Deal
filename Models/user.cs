@@ -66,10 +66,19 @@ public partial class User
     public virtual ICollection<Conversation> ConversationUser2s { get; set; } = new List<Conversation>();
 
     [InverseProperty("User")]
+    public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+
+    [InverseProperty("User")]
     public virtual ICollection<Listing> Listings { get; set; } = new List<Listing>();
 
     [InverseProperty("Sender")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    [InverseProperty("Reporter")]
+    public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     [InverseProperty("Buyer")]
     public virtual ICollection<Transaction> TransactionBuyers { get; set; } = new List<Transaction>();

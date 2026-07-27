@@ -20,6 +20,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Conversation> Conversations { get; set; }
 
+    public virtual DbSet<Favorite> Favorites { get; set; }
+
     public virtual DbSet<Listing> Listings { get; set; }
 
     public virtual DbSet<ListingImage> ListingImages { get; set; }
@@ -27,6 +29,10 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Location> Locations { get; set; }
 
     public virtual DbSet<Message> Messages { get; set; }
+
+    public virtual DbSet<Notification> Notifications { get; set; }
+
+    public virtual DbSet<Report> Reports { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
 
@@ -62,6 +68,17 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User2).WithMany(p => p.ConversationUser2s).HasConstraintName("fk_conv_user2");
         });
 
+        modelBuilder.Entity<Favorite>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("favorites_pkey");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+
+            entity.HasOne(d => d.Listing).WithMany(p => p.Favorites).HasConstraintName("fk_fav_listing");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Favorites).HasConstraintName("fk_fav_user");
+        });
+
         modelBuilder.Entity<Listing>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("listings_pkey");
@@ -89,7 +106,7 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("listing_images_pkey");
 
-            entity.Property(e => e.IsPrimary).HasDefaultValue(false); 
+            entity.Property(e => e.IsPrimary).HasDefaultValue(false);
             entity.Property(e => e.SortOrder).HasDefaultValue(0);
 
             entity.HasOne(d => d.Listing).WithMany(p => p.ListingImages).HasConstraintName("listing_images_listing_id_fkey");
@@ -116,6 +133,27 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("fk_msg_listing");
 
             entity.HasOne(d => d.Sender).WithMany(p => p.Messages).HasConstraintName("fk_msg_sender");
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("notifications_pkey");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+
+            entity.HasOne(d => d.User).WithMany(p => p.Notifications).HasConstraintName("fk_notif_user");
+        });
+
+        modelBuilder.Entity<Report>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("reports_pkey");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+
+            entity.HasOne(d => d.Listing).WithMany(p => p.Reports).HasConstraintName("fk_report_listing");
+
+            entity.HasOne(d => d.Reporter).WithMany(p => p.Reports).HasConstraintName("fk_report_reporter");
         });
 
         modelBuilder.Entity<Transaction>(entity =>

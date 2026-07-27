@@ -55,6 +55,9 @@ public partial class Listing
     public virtual Category Category { get; set; } = null!;
 
     [InverseProperty("Listing")]
+    public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+
+    [InverseProperty("Listing")]
     public virtual ICollection<ListingImage> ListingImages { get; set; } = new List<ListingImage>();
 
     [ForeignKey("LocationId")]
@@ -63,6 +66,9 @@ public partial class Listing
 
     [InverseProperty("Listing")]
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+
+    [InverseProperty("Listing")]
+    public virtual ICollection<Report> Reports { get; set; } = new List<Report>();
 
     [InverseProperty("Listing")]
     public virtual Transaction? Transaction { get; set; }

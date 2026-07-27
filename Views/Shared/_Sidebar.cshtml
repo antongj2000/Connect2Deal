@@ -3,63 +3,73 @@
     Set ViewData["ActivePage"] in each page to highlight the right nav item:
       "Marketplace" | "Messages" | "MyListings" | "Saved" | "Explore" | "Settings"
 *@
+@using System.Security.Claims
 @{
     var activePage = ViewData["ActivePage"] as string ?? "";
+    var isAuth = User.Identity != null && User.Identity.IsAuthenticated;
+    var username = isAuth ? User.Identity.Name : "";
+    var profileImage = isAuth ? User.FindFirstValue("ProfileImage") : null;
 }
-
 <!-- click-catcher behind the sidebar on small screens -->
 <div class="c2d-overlay" id="c2dOverlay"></div>
-
 <aside class="c2d-sidebar">
     <div class="c2d-brand">
-        <span class="c2d-brand-mark"></span>
-        <div>
-            <div class="c2d-brand-name">Connect2Deal</div>
-            <div class="c2d-brand-tag">Buy &amp; sell, locally</div>
-        </div>
+        @if (isAuth)
+        {
+            @if (!string.IsNullOrEmpty(profileImage))
+            {
+                <img class="c2d-brand-avatar-img" src="@profileImage" alt="@username" />
+            }
+            else
+            {
+                <span class="c2d-brand-avatar">@username.Substring(0, 1).ToUpper()</span>
+            }
+            <div>
+                <div class="c2d-brand-name">@username</div>
+                <div class="c2d-brand-tag">Buy &amp; sell, locally</div>
+            </div>
+        }
+        else
+        {
+            <span class="c2d-brand-mark"></span>
+            <div>
+                <div class="c2d-brand-name">Connect2Deal</div>
+                <div class="c2d-brand-tag">Buy &amp; sell, locally</div>
+            </div>
+        }
     </div>
-
     <nav class="c2d-nav">
         <div class="c2d-nav-label">Browse</div>
-
         <a class="c2d-nav-item @(activePage == "Marketplace" ? "is-active" : "")"
            asp-controller="Home" asp-action="Index">
             <span class="c2d-nav-ico">▤</span> Marketplace
         </a>
-
         <a class="c2d-nav-item" href="#" data-soon="true">
             <span class="c2d-nav-ico">◎</span> Explore <span class="c2d-soon">soon</span>
         </a>
-
         <a class="c2d-nav-item" href="#" data-soon="true">
             <span class="c2d-nav-ico">⚑</span> Saved <span class="c2d-soon">soon</span>
         </a>
-
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        @if (isAuth)
         {
             <div class="c2d-nav-label">My account</div>
-
             <a class="c2d-nav-item" asp-controller="Listing" asp-action="CreateListing">
                 <span class="c2d-nav-ico">＋</span> Post a listing
             </a>
-
             <a class="c2d-nav-item" href="#" data-soon="true">
                 <span class="c2d-nav-ico">▦</span> My listings <span class="c2d-soon">soon</span>
             </a>
-
             <a class="c2d-nav-item @(activePage == "Messages" ? "is-active" : "")"
                asp-controller="Chat" asp-action="Inbox">
                 <span class="c2d-nav-ico">✉</span> Messages
             </a>
-
             <a class="c2d-nav-item" href="#" data-soon="true">
                 <span class="c2d-nav-ico">⚙</span> Settings <span class="c2d-soon">soon</span>
             </a>
         }
     </nav>
-
     <div class="c2d-sidebar-foot">
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        @if (isAuth)
         {
             <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
                 <button type="submit" class="c2d-nav-item c2d-logout">

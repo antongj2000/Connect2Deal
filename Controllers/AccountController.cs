@@ -106,7 +106,8 @@ namespace Connect2Deal.Controllers
             {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
             new Claim(ClaimTypes.Name, user.Username),
-            new Claim("CoockieUserId", user.Id.ToString())
+            new Claim("CoockieUserId", user.Id.ToString()),
+            new Claim("ProfileImage", user.ProfileImage ?? "") 
             };
 
             var claimsIdentity = new ClaimsIdentity(

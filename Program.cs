@@ -17,7 +17,8 @@ builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddSignalR();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(
+    CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.ExpireTimeSpan = TimeSpan.FromMinutes(20);

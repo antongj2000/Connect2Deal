@@ -1391,3 +1391,54 @@ body {
 .c2d-inbox-name.is-unread {
     font-weight: 800;
 }
+
+.c2d-listing-foot {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+    .c2d-listing-foot .c2d-view {
+        flex: 1;
+    }
+
+.c2d-msg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    border: 1px solid #22c55e;
+    border-radius: 12px;
+    color: #22c55e;
+    background: transparent;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+    flex-shrink: 0;
+}
+
+    .c2d-msg-btn:hover {
+        background: #22c55e;
+        color: #fff;
+    }
+
+.c2d-brand-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c5ce7, #22c55e);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.c2d-brand-avatar-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}

@@ -47,10 +47,20 @@ namespace Connect2Deal.Hubs
 
             await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", new
             {
-            senderId = userId,
-            content = content,
-            createdAt = DateTime.UtcNow.ToString("HH:mm")
-             });
+                senderId = userId,
+                content = content,
+                createdAt = DateTime.UtcNow.ToString("HH:mm")
+            });
+
+            var otherUserId = await _chatService.GetOtherUserId(conversationId, userId);
+
+            if (otherUserId == null)
+            {
+                return;
+            }
+
+            await Clients.Group($"user-{otherUserId}").SendAsync("InboxUpdate", new { conversationId });
+
         }
 
         public async Task MarkRead(int conversationId)
@@ -64,8 +74,14 @@ namespace Connect2Deal.Hubs
         }
 
 
-        
+
+        public async Task JoinUserChannel()
+        {
+            int userId = int.Parse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
+        }
+
 
 
     }
-    }
+}

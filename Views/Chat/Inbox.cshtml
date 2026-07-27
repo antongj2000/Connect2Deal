@@ -55,6 +55,7 @@
                     var unreadCount = unread.GetValueOrDefault(conv.Id, 0);
 
                     <a class="c2d-inbox-item"
+                       data-conv-id="@conv.Id"
                        asp-controller="Chat" asp-action="Conversation" asp-route-id="@conv.Id">
 
                         <div class="c2d-inbox-avatar">@initial</div>
@@ -79,14 +80,53 @@
 
 @section Scripts {
     <script>
+        // ---------- SignalR: živi inbox ----------
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("InboxUpdate", function (msg) {
+            var row = document.querySelector('[data-conv-id="' + msg.conversationId + '"]');
+            if (!row) return;
+
+            var badge = row.querySelector('.c2d-inbox-badge');
+            if (badge) {
+                badge.textContent = parseInt(badge.textContent) + 1;
+            } else {
+                badge = document.createElement('span');
+                badge.className = 'c2d-inbox-badge';
+                badge.textContent = '1';
+                var arrow = row.querySelector('.c2d-inbox-time');
+                row.insertBefore(badge, arrow);
+            }
+
+            var name = row.querySelector('.c2d-inbox-name');
+            if (name) name.classList.add('is-unread');
+        });
+
+        connection.onreconnected(function () {
+            connection.invoke("JoinUserChannel")
+                .catch(function (err) { console.error(err); });
+        });
+
+        connection.start()
+            .then(function () {
+                return connection.invoke("JoinUserChannel");
+            })
+            .catch(function (err) {
+                console.error(err);
+            });
+
+        // ---------- sidebar ----------
         (function () {
-            const shell   = document.getElementById('c2dShell');
-            const burger  = document.getElementById('c2dBurger');
-            const overlay = document.getElementById('c2dOverlay');
+            var shell   = document.getElementById('c2dShell');
+            var burger  = document.getElementById('c2dBurger');
+            var overlay = document.getElementById('c2dOverlay');
 
             if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
-            burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
-            if (overlay) overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
+            burger.addEventListener('click', function () { shell.classList.toggle('is-collapsed'); });
+            if (overlay) overlay.addEventListener('click', function () { shell.classList.add('is-collapsed'); });
         })();
     </script>
 }

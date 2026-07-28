@@ -2,12 +2,13 @@
 @model List<Connect2Deal.Models.Listing>
 @{
     ViewData["Title"] = "Marketplace";
-    ViewData["HideChrome"] = true;          // hides the _Layout top nav/footer
-    ViewData["ActivePage"] = "Marketplace"; // tells the sidebar which item to highlight
+    ViewData["HideChrome"] = true;
 
     int? myId = User.Identity != null && User.Identity.IsAuthenticated
         ? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier))
         : (int?)null;
+
+    var savedIds = ViewData["SavedIds"] as List<int> ?? new List<int>();
 }
 
 @*
@@ -74,6 +75,7 @@
                     var hue = System.Math.Abs(cat.GetHashCode()) % 360;
                     var thumb = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
                     ?? listing.ListingImages?.FirstOrDefault();
+                    var isSaved = savedIds.Contains(listing.Id);
 
                     <article class="c2d-listing">
 
@@ -104,6 +106,21 @@
                                 <button class="c2d-view" data-detail-id="@listing.Id">
                                     View details
                                 </button>
+
+                                @if (myId != null)
+                                {
+                                    <button class="c2d-fav-btn @(isSaved ? "is-saved" : "")"
+                                            data-listing-id="@listing.Id"
+                                            title="Save listing"
+                                            onclick="event.stopPropagation();">
+                                        <svg viewBox="0 0 24 24" width="20" height="20"
+                                             fill="@(isSaved ? "currentColor" : "none")"
+                                             stroke="currentColor" stroke-width="2"
+                                             stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                        </svg>
+                                    </button>
+                                }
 
                                 @if (myId != null && listing.UserId != myId)
                                 {
@@ -180,6 +197,32 @@
             modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
             document.addEventListener('keydown', e => {
                 if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
+            });
+
+            // ---- favorites (srce dugme) ----
+            document.querySelectorAll('.c2d-fav-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const listingId = btn.getAttribute('data-listing-id');
+
+                    const response = await fetch('/Listing/Favorites', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'listingId=' + listingId
+                    });
+
+                    if (!response.ok) return;
+
+                    const data = await response.json();
+                    const heart = btn.querySelector('svg');
+
+                    if (data.isFavorited) {
+                        btn.classList.add('is-saved');
+                        heart.setAttribute('fill', 'currentColor');
+                    } else {
+                        btn.classList.remove('is-saved');
+                        heart.setAttribute('fill', 'none');
+                    }
+                });
             });
         })();
     </script>

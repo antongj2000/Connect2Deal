@@ -47,9 +47,19 @@
         <a class="c2d-nav-item" href="#" data-soon="true">
             <span class="c2d-nav-ico">◎</span> Explore <span class="c2d-soon">soon</span>
         </a>
-        <a class="c2d-nav-item" href="#" data-soon="true">
-            <span class="c2d-nav-ico">⚑</span> Saved <span class="c2d-soon">soon</span>
-        </a>
+        @if (isAuth)
+        {
+            <a class="c2d-nav-item @(activePage == "Saved" ? "is-active" : "")"
+               asp-controller="Home" asp-action="Index" asp-route-favorites="true">
+                <span class="c2d-nav-ico">⚑</span> Saved
+            </a>
+        }
+        else
+        {
+            <a class="c2d-nav-item" href="#" data-soon="true">
+                <span class="c2d-nav-ico">⚑</span> Saved <span class="c2d-soon">soon</span>
+            </a>
+        }
         @if (isAuth)
         {
             <div class="c2d-nav-label">My account</div>

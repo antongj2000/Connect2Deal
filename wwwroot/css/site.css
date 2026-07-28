@@ -1442,3 +1442,21 @@ body {
     object-fit: cover;
     flex-shrink: 0;
 }
+
+.c2d-fav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    border: 1px solid #e11d48;
+    border-radius: 12px;
+    color: #e11d48;
+    background: transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+}
+
+    .c2d-fav-btn:hover {
+        transform: scale(1.1);
+    }

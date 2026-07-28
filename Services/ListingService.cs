@@ -17,6 +17,8 @@ namespace Connect2Deal.Services
             mycontext = _mycontext;
         }
 
+        #region Category
+
         public async Task<List<Category>> ParentCategoryFetch()
         {
             return await mycontext.Categories
@@ -39,6 +41,7 @@ namespace Connect2Deal.Services
                 .AnyAsync(c => c.Id == childId && c.ParentId == parentId);
         }
 
+        #endregion
 
         #region Location
 
@@ -64,6 +67,9 @@ namespace Connect2Deal.Services
                 .AnyAsync(c => c.Id == childId && c.ParentId == parentId);
         }
 
+        #endregion
+
+        #region AddListing
 
         public async Task<Listing> CreateListing(int userId, int categoryId, int locationId,
                                          string title, string description, decimal price,
@@ -169,6 +175,77 @@ namespace Connect2Deal.Services
 
 
         #endregion
+
+
+        #region Favorites
+
+        public async Task<bool> FavoritesExists (int userId, int listingId)
+        {
+            var listing = await mycontext.Favorites.FirstOrDefaultAsync(x => x.UserId == userId && x.ListingId == listingId);
+
+            if (listing == null) 
+            {
+                return false;
+            }
+            return true;
+        }
+
+
+        public async Task RemoveFavorite (int userId, int listingId)
+        {
+            var listing = await mycontext.Favorites.FirstOrDefaultAsync(x => x.UserId == userId && x.ListingId == listingId);
+
+            if (listing == null)
+            {
+                return; 
+            }
+
+            mycontext.Favorites.Remove(listing);
+            await mycontext.SaveChangesAsync();
+        }
+
+
+
+        public async Task<Favorite> CreateFavorite(int userId, int listingId)
+        {
+            var newFavorite = new Favorite
+            {
+                UserId = userId,
+                ListingId = listingId
+            };
+
+            mycontext.Favorites.Add(newFavorite);
+            await mycontext.SaveChangesAsync();
+
+
+            return newFavorite;
+        }
+
+
+        public async Task<List<Listing>> GetUserFavorites (int userId)
+        {
+            var listings = await mycontext.Listings
+                .Include(x => x.Category)
+                .Include(x => x.Location)
+                .Include(x => x.ListingImages)
+                .Include(x => x.Favorites)
+                .Where(x => x.Favorites.Any(f => f.UserId == userId)).ToListAsync();
+
+            return listings;
+        }
+
+        public async Task<List<int>> GetUserFavoriteIds(int userId)
+        {
+            return await mycontext.Favorites
+                .Where(x => x.UserId == userId)
+                .Select(x => x.ListingId)
+                .ToListAsync();
+        }
+
+
+        #endregion
+
+
 
 
     }

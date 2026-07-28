@@ -144,9 +144,35 @@ namespace Connect2Deal.Controllers
 
 
 
-            #endregion
+        #endregion
 
 
 
+        #region Favorites
+        [HttpPost]
+        public async Task<IActionResult> Favorites(int listingId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            bool exists = await _listingService.FavoritesExists(userId, listingId);
+
+            if (exists)
+            {
+                await _listingService.RemoveFavorite(userId, listingId);
+            }
+            else
+            {
+
+                await _listingService.CreateFavorite(userId, listingId);
+            }
+
+            return Json(new { isFavorited = !exists });
         }
+
+
+
+        #endregion
+
+
+    }
 }

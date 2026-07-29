@@ -16,7 +16,7 @@ namespace Connect2Deal.Controllers
         {
             _listingService = listingService;
         }
-        public async Task<IActionResult> Index(bool favorites = false)
+        public async Task<IActionResult> Index(bool favorites = false, bool mylistings = false)
         {
             List<Listing> model;
 
@@ -25,6 +25,11 @@ namespace Connect2Deal.Controllers
                 int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 model = await _listingService.GetUserFavorites(userId);
                 ViewData["ActivePage"] = "Saved";
+            }else if (mylistings && User.Identity.IsAuthenticated)
+            {
+                int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                model = await _listingService.GetMyListings(userId);
+                ViewData["ActivePage"] = "MyListings";
             }
             else
             {

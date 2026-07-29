@@ -76,9 +76,9 @@
                     var thumb = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
                     ?? listing.ListingImages?.FirstOrDefault();
                     var isSaved = savedIds.Contains(listing.Id);
+                    var isInactive = listing.Status != "Active";
 
-                    <article class="c2d-listing">
-
+                    <article class="c2d-listing @(isInactive ? "c2d-listing-inactive" : "")">
                         <div class="c2d-thumb" style="--h:@hue">
                             @if (thumb != null)
                             {

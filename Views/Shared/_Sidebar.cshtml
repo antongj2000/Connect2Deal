@@ -66,8 +66,9 @@
             <a class="c2d-nav-item" asp-controller="Listing" asp-action="CreateListing">
                 <span class="c2d-nav-ico">＋</span> Post a listing
             </a>
-            <a class="c2d-nav-item" href="#" data-soon="true">
-                <span class="c2d-nav-ico">▦</span> My listings <span class="c2d-soon">soon</span>
+            <a class="c2d-nav-item @(activePage == "MyListings" ? "is-active" : "")"
+               asp-controller="Home" asp-action="Index" asp-route-mylistings="true">
+                <span class="c2d-nav-ico">▦</span> My listings
             </a>
             <a class="c2d-nav-item @(activePage == "Messages" ? "is-active" : "")"
                asp-controller="Chat" asp-action="Inbox">

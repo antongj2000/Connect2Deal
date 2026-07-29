@@ -105,7 +105,7 @@ namespace Connect2Deal.Services
 
         public async Task<List<Listing>> GetAllListings ()
         {
-            return await mycontext.Listings.Where(u => u.Status == "Active").
+            return await mycontext.Listings.Where(u => u.Status == "Active" ).
                 Include(l => l.Location).
                 Include(c => c.Category).
                 Include(u => u.User).
@@ -248,6 +248,22 @@ namespace Connect2Deal.Services
 
 
 
+
+        #region MyListings
+        public async Task<List<Listing>> GetMyListings(int userId)
+        {
+            return await mycontext.Listings.Where(l => l.UserId == userId).
+                Include(l => l.Location).
+                Include(c => c.Category).
+                Include(u => u.User).
+                Include(i => i.ListingImages).
+                OrderByDescending(u => u.CreatedAt).ToListAsync();
+        }
+
+
+
+
+        #endregion
     }
 
 

@@ -385,7 +385,7 @@ body {
 /* ---------- LISTING GRID ---------- */
 .c2d-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 22px;
     align-items: start;
 }
@@ -1460,3 +1460,7 @@ body {
     .c2d-fav-btn:hover {
         transform: scale(1.1);
     }
+
+.c2d-listing-inactive {
+    opacity: 0.5;
+}

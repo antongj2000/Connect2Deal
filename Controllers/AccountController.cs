@@ -130,7 +130,7 @@ namespace Connect2Deal.Controllers
                 authProperties);
 
 
-            return RedirectToAction("Privacy", "Home");
+            return RedirectToAction("Index", "Home");
         }
 
 

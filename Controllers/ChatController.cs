@@ -81,10 +81,12 @@ namespace Connect2Deal.Controllers
             return RedirectToAction("Conversation", new { id = conversation.Id });
 
         }
+
+       
+
+
+
+
     }
-
-
-
-
 
     }

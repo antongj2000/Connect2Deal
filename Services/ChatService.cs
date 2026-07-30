@@ -170,7 +170,38 @@ namespace Connect2Deal.Services
 
 
 
+        #region Rate the buyer
 
+        public async Task CloseTransaction(int listingId, int buyerId, int sellerId)
+        {
+            bool alreadySold = await mycontext.Transactions
+                .AnyAsync(x => x.ListingId == listingId);
+            if (alreadySold)
+            {
+                return;
+            }
+
+            var transaction = new Transaction()
+            {
+                ListingId = listingId,
+                SellerId = sellerId,
+                BuyerId = buyerId
+            };
+            mycontext.Transactions.Add(transaction);
+
+            var listing = await mycontext.Listings.FindAsync(listingId);
+            if (listing != null)
+            {
+                listing.Status = "Sold";
+            }
+
+            await mycontext.SaveChangesAsync();
+        }
+
+
+
+
+        #endregion
 
     }
 }

@@ -1,0 +1,33 @@
+﻿@model List<Connect2Deal.Models.Conversation>
+@{
+    int sellerId = (int)ViewBag.SellerId;
+    int listingId = (int)ViewBag.ListingId;
+}
+<div class="c2d-buyer-pick">
+    <h3 class="c2d-buyer-title">Izaberi kupca</h3>
+    <p class="c2d-buyer-sub">Označi korisnika koji je kupio ovaj oglas.</p>
+    @if (!Model.Any())
+    {
+        <div class="c2d-buyer-empty">
+            Nemaš nijedan razgovor, pa nema koga da izabereš kao kupca.
+        </div>
+    }
+    else
+    {
+        <div class="c2d-buyer-list">
+            @foreach (var conv in Model)
+            {
+                var other = conv.User1Id == sellerId ? conv.User2 : conv.User1;
+                <button type="button" class="c2d-buyer-item" data-buyer-id="@other.Id">
+                    <span class="c2d-buyer-avatar">@other.Username.Substring(0, 1).ToUpper()</span>
+                    <span class="c2d-buyer-name">@other.Username</span>
+                    <span class="c2d-buyer-check">✓</span>
+                </button>
+            }
+        </div>
+        <button type="button" class="c2d-buyer-confirm" id="c2dBuyerConfirm"
+                data-listing-id="@listingId" disabled>
+            Potvrdi prodaju
+        </button>
+    }
+</div>

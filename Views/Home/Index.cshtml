@@ -9,15 +9,8 @@
         : (int?)null;
 
     var savedIds = ViewData["SavedIds"] as List<int> ?? new List<int>();
+    var activePage = ViewData["ActivePage"] as string ?? "";
 }
-
-@*
-    Connect2Deal — marketplace feed.
-    Model:   List<Listing> from GetAllListings()
-             (Category, Location, User, ListingImages included).
-    Sidebar: Views/Shared/_Sidebar.cshtml — shared with the Chat pages.
-    CSS:     wwwroot/css/site.css
-*@
 
 <div class="c2d-shell" id="c2dShell">
 
@@ -77,6 +70,9 @@
                     ?? listing.ListingImages?.FirstOrDefault();
                     var isSaved = savedIds.Contains(listing.Id);
                     var isInactive = listing.Status != "Active";
+                    var canMarkSold = activePage == "MyListings"
+                    && listing.UserId == myId
+                    && listing.Status == "Active";
 
                     <article class="c2d-listing @(isInactive ? "c2d-listing-inactive" : "")">
                         <div class="c2d-thumb" style="--h:@hue">
@@ -107,7 +103,17 @@
                                     View details
                                 </button>
 
-                                @if (myId != null)
+                                @if (canMarkSold)
+                                {
+                                    <button class="c2d-sold-btn"
+                                            data-sold-id="@listing.Id"
+                                            title="Označi kao prodato"
+                                            onclick="event.stopPropagation();">
+                                        Mark as sold
+                                    </button>
+                                }
+
+                                @if (myId != null && listing.UserId != myId)
                                 {
                                     <button class="c2d-fav-btn @(isSaved ? "is-saved" : "")"
                                             data-listing-id="@listing.Id"
@@ -192,6 +198,64 @@
                         : '<div class="c2d-modal-loading">Listing not found.</div>';
                 });
             });
+
+            // ---- mark as sold (otvara modal sa listom kupaca) ----
+            document.querySelectorAll('[data-sold-id]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-sold-id');
+
+                    modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                    modal.classList.add('is-open');
+                    document.body.style.overflow = 'hidden';
+
+                    const response = await fetch(`/Listing/SelectBuyer?listingId=${id}`);
+                    modalBody.innerHTML = response.ok
+                        ? await response.text()
+                        : '<div class="c2d-modal-loading">Greška pri učitavanju.</div>';
+
+                    if (response.ok) {
+                        wireBuyerPicker();
+                    }
+                });
+            });
+
+            // ---- izbor kupca (radi na sadržaju ubačenom u modal) ----
+            function wireBuyerPicker() {
+                let selectedBuyerId = null;
+
+                const items = modalBody.querySelectorAll('.c2d-buyer-item');
+                const confirmBtn = modalBody.querySelector('#c2dBuyerConfirm');
+
+                items.forEach(item => {
+                    item.addEventListener('click', () => {
+                        items.forEach(i => i.classList.remove('is-picked'));
+                        item.classList.add('is-picked');
+                        selectedBuyerId = item.getAttribute('data-buyer-id');
+                        if (confirmBtn) confirmBtn.disabled = false;
+                    });
+                });
+
+                if (confirmBtn) {
+                    confirmBtn.addEventListener('click', async () => {
+                        if (!selectedBuyerId) return;
+                        const listingId = confirmBtn.getAttribute('data-listing-id');
+                        confirmBtn.disabled = true;
+
+                        const response = await fetch('/Listing/MarkAsSold', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'listingId=' + listingId + '&buyerId=' + selectedBuyerId
+                        });
+
+                        if (response.ok) {
+                            location.reload();
+                        } else {
+                            confirmBtn.disabled = false;
+                            alert('Greška pri označavanju prodaje.');
+                        }
+                    });
+                }
+            }
 
             modalClose.addEventListener('click', closeModal);
             modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });

@@ -13,14 +13,17 @@ namespace Connect2Deal.Controllers
     {
 
         private readonly ListingService _listingService;
+        private readonly ChatService _chatService;
         private readonly IWebHostEnvironment _environment;
 
         public ListingController(
             ListingService listingService,
+            ChatService chatService,
             IWebHostEnvironment environment)
         {
             _listingService = listingService;
             _environment = environment;
+            _chatService = chatService;
         }
 
 
@@ -173,6 +176,49 @@ namespace Connect2Deal.Controllers
 
         #endregion
 
+
+
+        #region Close Transaction and sellect buyer
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsSold(int listingId, int buyerId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var listings = await _listingService.GetListingById(listingId);
+
+            if (listings == null)
+            {
+                return NotFound();
+            }
+
+            if (listings.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            await _chatService.CloseTransaction(listingId, buyerId, userId);
+
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SelectBuyer(int listingId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var conversations = await _chatService.GetConversations(userId);
+
+            ViewBag.ListingId = listingId;
+            ViewBag.SellerId = userId; 
+
+            return PartialView("_SelectBuyer", conversations);
+        }
+
+
+
+
+
+        #endregion
 
     }
 }

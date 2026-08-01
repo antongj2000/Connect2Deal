@@ -197,12 +197,12 @@ namespace Connect2Deal.Controllers
                 return Forbid();
             }
 
-            await _chatService.CloseTransaction(listingId, buyerId, userId);
+            await _listingService.CloseTransaction(listingId, buyerId, userId);
 
             return Json(new { success = true });
         }
 
-        [HttpGet]
+        [HttpGet]   
         public async Task<IActionResult> SelectBuyer(int listingId)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));

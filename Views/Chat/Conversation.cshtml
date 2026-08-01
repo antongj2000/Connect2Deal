@@ -8,7 +8,6 @@
     int myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     int conversationId = (int)ViewData["ConversationId"];
 
-    // work out who the other person is from the messages
     var otherUser = Model.FirstOrDefault(m => m.SenderId != myId)?.Sender;
     var otherName = otherUser?.Username ?? "Conversation";
     var otherInitial = otherName.Substring(0, 1).ToUpper();
@@ -73,7 +72,7 @@
     </main>
 </div>
 
-    @section Scripts {
+@section Scripts {
     <script>
         const conversationId = @conversationId;
         const myId = @myId;
@@ -88,18 +87,15 @@
             .withAutomaticReconnect()
             .build();
 
-        // server poziva ovu funkciju kad stigne nova poruka
         connection.on("ReceiveMessage", function (msg) {
             addBubble(msg.senderId, msg.content, msg.createdAt);
 
-            // poruka je stigla dok gledam ovu stranicu → pročitana je
             if (msg.senderId !== myId && document.hasFocus()) {
                 connection.invoke("MarkRead", conversationId)
                     .catch(function (err) { console.error(err); });
             }
         });
 
-        // veza se vratila nakon prekida → nova žica, mora ponovo u grupu
         connection.onreconnected(function () {
             connection.invoke("JoinConversation", conversationId)
                 .catch(function (err) { console.error(err); });
@@ -152,18 +148,7 @@
             chatInput.focus();
         });
 
-        // ---------- sidebar ----------
-        (function () {
-            const shell   = document.getElementById('c2dShell');
-            const burger  = document.getElementById('c2dBurger');
-            const overlay = document.getElementById('c2dOverlay');
-
-            if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
-            burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
-            if (overlay) overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
-
-            chatBody.scrollTop = chatBody.scrollHeight;
-        })();
+        // skrol na dno pri učitavanju
+        chatBody.scrollTop = chatBody.scrollHeight;
     </script>
-}
 }

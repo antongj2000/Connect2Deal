@@ -14,7 +14,6 @@
 {
     var jsonImages = JsonSerializer.Serialize(images.Select(i => i.ImagePath));
 
-    <!-- DODAT TAČAN ID: id="c2d-main-slider-container" -->
     <div id="c2d-main-slider-container" class="c2d-detail-thumb c2d-slider-container" style="--h:@hue; position: relative; overflow: hidden; height: 350px;">
 
         <img id="c2d-main-slider-img" src="@images[0].ImagePath" alt="@Model.Title"
@@ -80,7 +79,6 @@
         }
     </div>
 
-    <!-- FULLSCREEN OVERLAY SADA SA SIGURNIM PROVJERAMA UNUTAR ONCLICK-A -->
     <div id="c2d-fs-overlay" data-images="@jsonImages" data-current="0" style="display: none; position: fixed; z-index: 99999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); align-items: center; justify-content: center; backdrop-filter: blur(8px);">
 
         <span onclick="this.parentElement.style.display = 'none';" style="position: absolute; top: 20px; right: 25px; color: #fff; font-size: 40px; font-weight: bold; cursor: pointer; z-index: 100000; user-select: none;">&times;</span>

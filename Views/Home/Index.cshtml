@@ -165,25 +165,10 @@
 @section Scripts {
     <script>
         (function () {
-            // ---- sidebar toggle ----
-            const shell   = document.getElementById('c2dShell');
-            const burger  = document.getElementById('c2dBurger');
-            const overlay = document.getElementById('c2dOverlay');
-
-            if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
-            burger.addEventListener('click', () => shell.classList.toggle('is-collapsed'));
-            if (overlay) overlay.addEventListener('click', () => shell.classList.add('is-collapsed'));
-
-            // ---- listing detail modal ----
             const modal      = document.getElementById('c2dModal');
-            const modalClose = document.getElementById('c2dModalClose');
             const modalBody  = document.getElementById('c2dModalContent');
 
-            function closeModal() {
-                modal.classList.remove('is-open');
-                document.body.style.overflow = '';
-            }
-
+            // ---- listing detail modal (otvaranje) ----
             document.querySelectorAll('[data-detail-id]').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const id = btn.getAttribute('data-detail-id');
@@ -256,12 +241,6 @@
                     });
                 }
             }
-
-            modalClose.addEventListener('click', closeModal);
-            modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
-            });
 
             // ---- favorites (srce dugme) ----
             document.querySelectorAll('.c2d-fav-btn').forEach(btn => {

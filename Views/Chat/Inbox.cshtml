@@ -4,17 +4,12 @@
     ViewData["Title"] = "Messages";
     ViewData["HideChrome"] = true;
     ViewData["ActivePage"] = "Messages";
-
     int myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     var unread = ViewData["Unread"] as Dictionary<int, int> ?? new();
 }
-
 <div class="c2d-shell" id="c2dShell">
-
     <partial name="_Sidebar" />
-
     <main class="c2d-main">
-
         <header class="c2d-topbar">
             <div class="c2d-topbar-left">
                 <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
@@ -26,12 +21,10 @@
                 </div>
             </div>
         </header>
-
         <div class="c2d-section-head">
             <h2 class="c2d-section-title">Conversations</h2>
             <span class="c2d-count">@Model.Count total</span>
         </div>
-
         @if (!Model.Any())
         {
             <div class="c2d-empty">
@@ -53,23 +46,18 @@
                     var initial = name.Substring(0, 1).ToUpper();
                     var when = conv.LastMessageAt?.ToString("dd MMM, HH:mm") ?? "No messages yet";
                     var unreadCount = unread.GetValueOrDefault(conv.Id, 0);
-
                     <a class="c2d-inbox-item"
                        data-conv-id="@conv.Id"
                        asp-controller="Chat" asp-action="Conversation" asp-route-id="@conv.Id">
-
                         <div class="c2d-inbox-avatar">@initial</div>
-
                         <div class="c2d-inbox-info">
                             <div class="c2d-inbox-name @(unreadCount > 0 ? "is-unread" : "")">@name</div>
                             <div class="c2d-inbox-preview">@when</div>
                         </div>
-
                         @if (unreadCount > 0)
                         {
                             <span class="c2d-inbox-badge">@unreadCount</span>
                         }
-
                         <span class="c2d-inbox-time">›</span>
                     </a>
                 }
@@ -77,7 +65,6 @@
         }
     </main>
 </div>
-
 @section Scripts {
     <script>
         // ---------- SignalR: živi inbox ----------
@@ -117,16 +104,5 @@
             .catch(function (err) {
                 console.error(err);
             });
-
-        // ---------- sidebar ----------
-        (function () {
-            var shell   = document.getElementById('c2dShell');
-            var burger  = document.getElementById('c2dBurger');
-            var overlay = document.getElementById('c2dOverlay');
-
-            if (window.innerWidth <= 900) shell.classList.add('is-collapsed');
-            burger.addEventListener('click', function () { shell.classList.toggle('is-collapsed'); });
-            if (overlay) overlay.addEventListener('click', function () { shell.classList.add('is-collapsed'); });
-        })();
     </script>
 }

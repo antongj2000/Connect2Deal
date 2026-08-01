@@ -74,6 +74,12 @@
                asp-controller="Chat" asp-action="Inbox">
                 <span class="c2d-nav-ico">✉</span> Messages
             </a>
+
+            <a class="c2d-nav-item @(activePage == "Notification" ? "is-active" : "")"
+               asp-controller="Notification" asp-action="Notification">
+                <span class="c2d-nav-ico">✉</span> Notification
+            </a>
+
             <a class="c2d-nav-item" href="#" data-soon="true">
                 <span class="c2d-nav-ico">⚙</span> Settings <span class="c2d-soon">soon</span>
             </a>

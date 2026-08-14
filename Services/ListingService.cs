@@ -1,4 +1,5 @@
-﻿using Connect2Deal.Data;
+﻿using Connect2Deal.Constants;
+using Connect2Deal.Data;
 using Connect2Deal.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -299,7 +300,7 @@ namespace Connect2Deal.Services
             var notification = new Notification()
             {
                 UserId = buyerId,
-                Type = "RateSeller",
+                Type = NotificationTypes.RateSeller,
                 Message = $"Congratulations on your new \"{listing.Title}\"! We wish you the best using it. Please rate your seller to help build a trustworthy community.",
                 RelatedId = transaction.Id
             };

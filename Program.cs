@@ -16,6 +16,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ListingService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<UserRatingService>();
 builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(

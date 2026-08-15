@@ -47,6 +47,29 @@ namespace Connect2Deal.Services
 
 
 
+        #region Notification for seller
+
+        public async Task CreateRatingReceivedNotification(int sellerId, int ratingId, string raterUsername, int score, string listingTitle)
+        {
+            var notification = new Notification
+            {
+                UserId = sellerId,
+                Type = NotificationTypes.RatingReceived,
+                Message = $"{raterUsername} rated you {score} stars for \"{listingTitle}\".",
+                RelatedId = ratingId,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            mycontext.Notifications.Add(notification);
+            await mycontext.SaveChangesAsync();
+        }
+
+
+
+        #endregion
+
+
 
     }
 }

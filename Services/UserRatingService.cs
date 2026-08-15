@@ -28,6 +28,7 @@ namespace Connect2Deal.Services
               return await mycontext.Transactions
             .Include(x => x.Seller)
             .Include(x => x.Listing)
+            .Include(x => x.Buyer)
             .FirstOrDefaultAsync(x => x.Id == transactionId && x.BuyerId == buyerId);
         }
 

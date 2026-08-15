@@ -64,12 +64,23 @@ namespace Connect2Deal.Controllers
                 return RedirectToAction("Notification", "Notification");
             }
 
-            await _userRatingService.CreateRating(transactionId, userId, transaction.SellerId, score, comment);
+            var rating = await _userRatingService.CreateRating(transactionId, userId, transaction.SellerId, score, comment);
 
             await _notificationService.MarkNotificationAsRead(transactionId, userId);
 
+            await _notificationService.CreateRatingReceivedNotification(
+                        transaction.SellerId,
+                        rating.Id,
+                        transaction.Buyer.Username,
+                        score,
+                        transaction.Listing.Title
+                );
+
             return RedirectToAction("Notification", "Notification");
         }
+
+
+      
 
 
     }

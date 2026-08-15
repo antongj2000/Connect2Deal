@@ -1,4 +1,5 @@
-﻿using Connect2Deal.Data;
+﻿using Connect2Deal.Constants;
+using Connect2Deal.Data;
 using Connect2Deal.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +30,23 @@ namespace Connect2Deal.Services
             return notifications;
         }
 
-        
+
+        public async Task MarkNotificationAsRead(int transactionId, int userId)
+        {
+            var notification = await mycontext.Notifications.FirstOrDefaultAsync(
+                x => x.UserId == userId
+                  && x.Type == NotificationTypes.RateSeller
+                  && x.RelatedId == transactionId);
+
+            if (notification != null)
+            {
+                notification.IsRead = true;
+                await mycontext.SaveChangesAsync();
+            }
+        }
 
 
-      
+
+
     }
 }

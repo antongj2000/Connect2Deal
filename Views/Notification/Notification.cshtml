@@ -43,12 +43,9 @@
                                 </span>
                                 @if (n.Type == NotificationTypes.RateSeller && !n.IsRead)
                                 {
-                                    <a class="c2d-notif-action"
-                                       asp-controller="Rating"
-                                       asp-action="RateSeller"
-                                       asp-route-transactionId="@n.RelatedId">
+                                    <button type="button" class="c2d-notif-action" data-rate-tx="@n.RelatedId">
                                         Rate seller
-                                    </a>
+                                    </button>
                                 }
                             </div>
                         </div>
@@ -58,3 +55,68 @@
         }
     </main>
 </div>
+
+<div class="c2d-modal-overlay" id="rateModalOverlay">
+    <div class="c2d-modal">
+        <button class="c2d-modal-close" id="rateModalClose">&times;</button>
+        <div id="rateModalContent"></div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        (function () {
+            const overlay = document.getElementById('rateModalOverlay');
+            const content = document.getElementById('rateModalContent');
+            const closeBtn = document.getElementById('rateModalClose');
+
+            function openModal() {
+                overlay.classList.add('is-open');
+            }
+
+            function closeModal() {
+                overlay.classList.remove('is-open');
+                content.innerHTML = '';
+            }
+
+            document.querySelectorAll('[data-rate-tx]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const txId = btn.dataset.rateTx;
+
+                    content.innerHTML = '<div class="c2d-modal-loading">Loading…</div>';
+                    openModal();
+
+                    fetch('/UserRating/RateSeller?transactionId=' + txId)
+                        .then(function (res) {
+                            if (!res.ok) throw new Error('Failed to load');
+                            return res.text();
+                        })
+                        .then(function (html) {
+                            content.innerHTML = html;
+
+                            // izvrši <script> iz partiala — innerHTML ga ne pokreće sam
+                            content.querySelectorAll('script').forEach(function (oldScript) {
+                                const newScript = document.createElement('script');
+                                newScript.textContent = oldScript.textContent;
+                                oldScript.replaceWith(newScript);
+                            });
+                        })
+                        .catch(function () {
+                            content.innerHTML = '<div class="c2d-modal-loading">Something went wrong.</div>';
+                        });
+                });
+            });
+
+            closeBtn.addEventListener('click', closeModal);
+
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeModal();
+            });
+        })();
+    </script>
+}

@@ -1772,3 +1772,29 @@ body {
 }
 
 
+.c2d-inbox-badge.is-hidden {
+    display: none;
+}
+
+.c2d-toast {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 2000;
+    max-width: 340px;
+    background: #171a2b;
+    color: #fff;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: .9rem;
+    line-height: 1.4;
+    box-shadow: 0 12px 30px -8px rgba(0, 0, 0, .4);
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity .28s ease, transform .28s ease;
+}
+
+    .c2d-toast.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }

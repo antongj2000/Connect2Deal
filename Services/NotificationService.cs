@@ -1,7 +1,9 @@
 ﻿using Connect2Deal.Constants;
 using Connect2Deal.Data;
+using Connect2Deal.Hubs;
 using Connect2Deal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Connect2Deal.Services
@@ -13,10 +15,12 @@ namespace Connect2Deal.Services
     {
 
         private readonly AppDbContext mycontext;
+        private readonly IHubContext<ChatHub> _hub;
 
-        public NotificationService(AppDbContext _mycontext)
+        public NotificationService(AppDbContext _mycontext, IHubContext<ChatHub> hub)
         {
             mycontext = _mycontext;
+            _hub = hub;
         }
 
 
@@ -25,7 +29,7 @@ namespace Connect2Deal.Services
         {
 
             var notifications = await mycontext.Notifications.Where(x=>x.UserId==userId).
-                OrderByDescending(x => x.CreatedAt).ToListAsync();
+                OrderByDescending(x => x.CreatedAt).AsNoTracking().ToListAsync();
 
             return notifications;
         }
@@ -63,6 +67,11 @@ namespace Connect2Deal.Services
 
             mycontext.Notifications.Add(notification);
             await mycontext.SaveChangesAsync();
+
+            await _hub.Clients.Group($"user-{sellerId}").SendAsync("NotificationUpdate", new
+            {
+                message = notification.Message
+            });
         }
 
 
@@ -70,6 +79,31 @@ namespace Connect2Deal.Services
         #endregion
 
 
+        #region Count all unreaded notifications
+
+        public async Task<int> CountAllUnreadNotifications(int userId)
+        {
+            int allNotifications = await mycontext.Notifications.CountAsync(x=>x.IsRead != true && x.UserId == userId);
+            return allNotifications;
+        }
+
+        #endregion
+
+        #region Mark notifications as read
+
+        public async Task MarkAllAsRead(int userId)
+        {
+            var readNotifications = await mycontext.Notifications.Where(x=>x.UserId == userId && !x.IsRead && x.Type!=NotificationTypes.RateSeller).ToListAsync();
+
+            foreach (var read in readNotifications)
+            {
+                read.IsRead = true;
+            }
+
+            await mycontext.SaveChangesAsync();
+        }
+
+        #endregion
 
     }
 }

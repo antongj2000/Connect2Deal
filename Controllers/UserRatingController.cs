@@ -70,7 +70,7 @@ namespace Connect2Deal.Controllers
 
             await _notificationService.CreateRatingReceivedNotification(
                         transaction.SellerId,
-                        rating.Id,
+                        rating.Id,  
                         transaction.Buyer.Username,
                         score,
                         transaction.Listing.Title

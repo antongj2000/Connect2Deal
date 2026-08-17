@@ -1,0 +1,4 @@
+﻿@model int
+
+<span class="c2d-inbox-badge @(Model > 0 ? "" : "is-hidden")"
+      data-badge="@ViewData["Kind"]">@Model</span>

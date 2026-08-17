@@ -20,20 +20,15 @@ namespace Connect2Deal.Controllers
 
 
 
-        
+
         [Authorize]
         public async Task<IActionResult> Notification()
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-            var notifications =  await mynotification.GetAllNotifications(userId);
-
+            var notifications = await mynotification.GetAllNotifications(userId);
+            await mynotification.MarkAllAsRead(userId);
             return View(notifications);
         }
-
-
-        
-        
 
 
 

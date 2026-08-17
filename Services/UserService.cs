@@ -60,5 +60,12 @@ namespace Connect2Deal.Services
 
 
         #endregion
+
+
+        #region Settings
+
+
+
+        #endregion
     }
 }

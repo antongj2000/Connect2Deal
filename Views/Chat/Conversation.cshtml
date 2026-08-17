@@ -71,43 +71,46 @@
         </div>
     </main>
 </div>
-
 @section Scripts {
     <script>
         const conversationId = @conversationId;
         const myId = @myId;
 
+        window.c2dActiveConversation = conversationId;
+
         const chatBody = document.getElementById('chatBody');
         const chatForm = document.querySelector('.c2d-chat-form');
         const chatInput = chatForm.querySelector('input[name="content"]');
 
-        // ---------- SignalR ----------
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .withAutomaticReconnect()
-            .build();
+        // ---------- koristimo zajedničku konekciju iz site.js ----------
+        window.c2dReady.then(function () {
+            const connection = window.c2dConnection;
 
-        connection.on("ReceiveMessage", function (msg) {
-            addBubble(msg.senderId, msg.content, msg.createdAt);
+            connection.on("ReceiveMessage", function (msg) {
+                addBubble(msg.senderId, msg.content, msg.createdAt);
 
-            if (msg.senderId !== myId && document.hasFocus()) {
-                connection.invoke("MarkRead", conversationId)
-                    .catch(function (err) { console.error(err); });
-            }
-        });
+                if (msg.senderId !== myId && document.hasFocus()) {
+                    connection.invoke("MarkRead", conversationId)
+                        .catch(function (err) { console.error(err); });
+                }
+            });
 
-        connection.onreconnected(function () {
             connection.invoke("JoinConversation", conversationId)
                 .catch(function (err) { console.error(err); });
-        });
 
-        connection.start()
-            .then(function () {
-                return connection.invoke("JoinConversation", conversationId);
-            })
-            .catch(function (err) {
-                console.error(err);
+            chatForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const text = chatInput.value.trim();
+                if (!text) return;
+
+                connection.invoke("SendMessage", conversationId, text)
+                    .catch(function (err) { console.error(err); });
+
+                chatInput.value = '';
+                chatInput.focus();
             });
+        });
 
         // ---------- crtanje balončića ----------
         function addBubble(senderId, content, time) {
@@ -133,20 +136,6 @@
 
             chatBody.scrollTop = chatBody.scrollHeight;
         }
-
-        // ---------- slanje poruke ----------
-        chatForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            connection.invoke("SendMessage", conversationId, text)
-                .catch(function (err) { console.error(err); });
-
-            chatInput.value = '';
-            chatInput.focus();
-        });
 
         // skrol na dno pri učitavanju
         chatBody.scrollTop = chatBody.scrollHeight;

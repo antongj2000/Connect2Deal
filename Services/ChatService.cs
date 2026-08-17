@@ -169,6 +169,19 @@ namespace Connect2Deal.Services
         #endregion
 
 
+        #region Count all unreaded messages
+
+        public async Task<int> CountAllUnreadMessages (int userId)
+        {
+            int allMessages = await mycontext.Messages.CountAsync(x=>x.SenderId != userId && x.ReadAt == null
+            && (x.Conversation.User1Id == userId || x.Conversation.User2Id == userId));
+            return allMessages;
+        }
+
+
+        #endregion
+
+
 
     }
 }

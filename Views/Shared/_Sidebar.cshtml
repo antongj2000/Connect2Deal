@@ -73,11 +73,13 @@
             <a class="c2d-nav-item @(activePage == "Messages" ? "is-active" : "")"
                asp-controller="Chat" asp-action="Inbox">
                 <span class="c2d-nav-ico">✉</span> Messages
+                @await Component.InvokeAsync("UnreadBadges", new { kind = "messages" })
             </a>
 
             <a class="c2d-nav-item @(activePage == "Notification" ? "is-active" : "")"
                asp-controller="Notification" asp-action="Notification">
                 <span class="c2d-nav-ico">✉</span> Notification
+                @await Component.InvokeAsync("UnreadBadges", new { kind = "notifications" })
             </a>
 
             <a class="c2d-nav-item" href="#" data-soon="true">

@@ -80,19 +80,18 @@ namespace Connect2Deal.Controllers
             return View();
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(Login model)
         {
             if (!ModelState.IsValid)
             {
-                return View(model);     
+                return View(model);
             }
 
             var user = await _userService.LoginCheck(model.Username, model.Password);
 
-            if (user==null)
+            if (user == null)
             {
                 ModelState.AddModelError("Username", "This username doesn't exist or password is wrong");
             }
@@ -103,36 +102,27 @@ namespace Connect2Deal.Controllers
             }
 
             var claims = new List<Claim>
-            {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), 
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim("CoockieUserId", user.Id.ToString()),
-            new Claim("ProfileImage", user.ProfileImage ?? "") 
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim("CoockieUserId", user.Id.ToString()),
+        new Claim("ProfileImage", user.ProfileImage ?? "")
+    };
 
-            var claimsIdentity = new ClaimsIdentity(
-            claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-            
-            await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(claimsIdentity));
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = true
             };
 
-            
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-
             return RedirectToAction("Index", "Home");
         }
-
 
         #endregion
 

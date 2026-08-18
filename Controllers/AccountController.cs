@@ -3,6 +3,7 @@ using Connect2Deal.Services;
 using Connect2Deal.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Claims;
@@ -14,12 +15,13 @@ namespace Connect2Deal.Controllers
     {
 
         private readonly UserService _userService;
+        private readonly IWebHostEnvironment _environment;
 
-        public AccountController(UserService userService)
+        public AccountController(UserService userService, IWebHostEnvironment environment)
         {
             _userService = userService;
+            _environment = environment;
         }
-
 
         #region Registration of a new user
 
@@ -132,6 +134,131 @@ namespace Connect2Deal.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
+
+
+        #region Settings
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Settings()
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var user = await _userService.getUserById(userId);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new UpdateProfileDetails
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                Description = user.Description
+            };
+
+            return View(model);
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadProfileImage(IFormFile image)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var newPath = await _userService.SaveProfilePicture(userId, image, _environment.WebRootPath);
+
+            if (newPath == null)
+            {
+                TempData["SettingsError"] = "Upload failed. Use a JPG, PNG or WEBP under 5 MB.";
+                return RedirectToAction("Settings");
+            }
+
+            var claims = new List<Claim>
+             {
+        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+             new Claim(ClaimTypes.Name, User.Identity!.Name ?? ""),
+        new Claim("CoockieUserId", userId.ToString()),
+                 new Claim("ProfileImage", newPath)
+              };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            TempData["SettingsSuccess"] = "Profile picture updated.";
+            return RedirectToAction("Settings");
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(UpdateProfileDetails model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["SettingsError"] = "Please check the profile fields and try again.";
+                return RedirectToAction("Settings");
+            }
+
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var success = await _userService.UpdateProfile(
+                userId,
+                model.FirstName,
+                model.LastName,
+                model.PhoneNumber,
+                model.Description
+            );
+
+            if (!success)
+            {
+                TempData["SettingsError"] = "Profile update failed.";
+                return RedirectToAction("Settings");
+            }
+
+            TempData["SettingsSuccess"] = "Profile updated.";
+            return RedirectToAction("Settings");
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePassword model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["SettingsError"] = "Check the password fields — the new passwords must match and be at least 6 characters.";
+                return RedirectToAction("Settings");
+            }
+
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var success = await _userService.ChangePassword(userId, model.CurrentPassword, model.NewPassword);
+
+            if (!success)
+            {
+                TempData["SettingsError"] = "Current password is incorrect.";
+                return RedirectToAction("Settings");
+            }
+
+            TempData["SettingsSuccess"] = "Password changed.";
+            return RedirectToAction("Settings");
+        }
+
+        #endregion
 
 
     }

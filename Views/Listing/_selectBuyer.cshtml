@@ -4,12 +4,12 @@
     int listingId = (int)ViewBag.ListingId;
 }
 <div class="c2d-buyer-pick">
-    <h3 class="c2d-buyer-title">Izaberi kupca</h3>
-    <p class="c2d-buyer-sub">Označi korisnika koji je kupio ovaj oglas.</p>
+    <h3 class="c2d-buyer-title">Select buyer</h3>
+    <p class="c2d-buyer-sub">Choose the person who bought this listing.</p>
     @if (!Model.Any())
     {
         <div class="c2d-buyer-empty">
-            Nemaš nijedan razgovor, pa nema koga da izabereš kao kupca.
+            You don't have any conversations yet, so there's no one to pick as a buyer.
         </div>
     }
     else
@@ -19,7 +19,14 @@
             {
                 var other = conv.User1Id == sellerId ? conv.User2 : conv.User1;
                 <button type="button" class="c2d-buyer-item" data-buyer-id="@other.Id">
-                    <span class="c2d-buyer-avatar">@other.Username.Substring(0, 1).ToUpper()</span>
+                    @if (!string.IsNullOrEmpty(other.ProfileImage))
+                    {
+                        <img class="c2d-buyer-avatar" src="@other.ProfileImage" alt="@other.Username" />
+                    }
+                    else
+                    {
+                        <span class="c2d-buyer-avatar">@other.Username.Substring(0, 1).ToUpper()</span>
+                    }
                     <span class="c2d-buyer-name">@other.Username</span>
                     <span class="c2d-buyer-check">✓</span>
                 </button>
@@ -27,7 +34,7 @@
         </div>
         <button type="button" class="c2d-buyer-confirm" id="c2dBuyerConfirm"
                 data-listing-id="@listingId" disabled>
-            Potvrdi prodaju
+            Confirm sale
         </button>
     }
 </div>

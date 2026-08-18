@@ -82,8 +82,9 @@
                 @await Component.InvokeAsync("UnreadBadges", new { kind = "notifications" })
             </a>
 
-            <a class="c2d-nav-item" href="#" data-soon="true">
-                <span class="c2d-nav-ico">⚙</span> Settings <span class="c2d-soon">soon</span>
+            <a class="c2d-nav-item @(activePage == "Settings" ? "is-active" : "")"
+               asp-controller="Account" asp-action="Settings">
+                <span class="c2d-nav-ico">⚙</span> Settings
             </a>
         }
     </nav>

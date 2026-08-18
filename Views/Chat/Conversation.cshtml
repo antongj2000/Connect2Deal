@@ -35,7 +35,14 @@
 
             <div class="c2d-chat-head">
                 <a class="c2d-chat-back" asp-controller="Chat" asp-action="Inbox">‹</a>
-                <div class="c2d-chat-avatar">@otherInitial</div>
+                @if (!string.IsNullOrEmpty(otherUser?.ProfileImage))
+                {
+                    <img class="c2d-chat-avatar" src="@otherUser.ProfileImage" alt="@otherName" />
+                }
+                else
+                {
+                    <div class="c2d-chat-avatar">@otherInitial</div>
+                }
                 <div class="c2d-chat-name">@otherName</div>
             </div>
 

@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\uploads\listings\" />
+    <Folder Include="wwwroot\uploads\users\" />
   </ItemGroup>
 
 </Project>

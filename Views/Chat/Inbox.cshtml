@@ -49,7 +49,14 @@
                     <a class="c2d-inbox-item"
                        data-conv-id="@conv.Id"
                        asp-controller="Chat" asp-action="Conversation" asp-route-id="@conv.Id">
-                        <div class="c2d-inbox-avatar">@initial</div>
+                        @if (!string.IsNullOrEmpty(otherUser?.ProfileImage))
+                        {
+                            <img class="c2d-inbox-avatar" src="@otherUser.ProfileImage" alt="@name" />
+                        }
+                        else
+                        {
+                            <div class="c2d-inbox-avatar">@initial</div>
+                        }
                         <div class="c2d-inbox-info">
                             <div class="c2d-inbox-name @(unreadCount > 0 ? "is-unread" : "")">@name</div>
                             <div class="c2d-inbox-preview">@when</div>
@@ -67,42 +74,25 @@
 </div>
 @section Scripts {
     <script>
-        // ---------- SignalR: živi inbox ----------
-        var connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .withAutomaticReconnect()
-            .build();
+        window.c2dReady.then(function () {
+            window.c2dConnection.on("InboxUpdate", function (msg) {
+                var row = document.querySelector('[data-conv-id="' + msg.conversationId + '"]');
+                if (!row) return;
 
-        connection.on("InboxUpdate", function (msg) {
-            var row = document.querySelector('[data-conv-id="' + msg.conversationId + '"]');
-            if (!row) return;
+                var badge = row.querySelector('.c2d-inbox-badge');
+                if (badge) {
+                    badge.textContent = parseInt(badge.textContent) + 1;
+                } else {
+                    badge = document.createElement('span');
+                    badge.className = 'c2d-inbox-badge';
+                    badge.textContent = '1';
+                    var arrow = row.querySelector('.c2d-inbox-time');
+                    row.insertBefore(badge, arrow);
+                }
 
-            var badge = row.querySelector('.c2d-inbox-badge');
-            if (badge) {
-                badge.textContent = parseInt(badge.textContent) + 1;
-            } else {
-                badge = document.createElement('span');
-                badge.className = 'c2d-inbox-badge';
-                badge.textContent = '1';
-                var arrow = row.querySelector('.c2d-inbox-time');
-                row.insertBefore(badge, arrow);
-            }
-
-            var name = row.querySelector('.c2d-inbox-name');
-            if (name) name.classList.add('is-unread');
-        });
-
-        connection.onreconnected(function () {
-            connection.invoke("JoinUserChannel")
-                .catch(function (err) { console.error(err); });
-        });
-
-        connection.start()
-            .then(function () {
-                return connection.invoke("JoinUserChannel");
-            })
-            .catch(function (err) {
-                console.error(err);
+                var name = row.querySelector('.c2d-inbox-name');
+                if (name) name.classList.add('is-unread');
             });
+        });
     </script>
 }

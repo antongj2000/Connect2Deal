@@ -1,20 +1,23 @@
 ﻿@model Connect2Deal.Models.Transaction
-
 <div class="c2d-rate-card">
     <h2 class="c2d-rate-heading">Rate seller</h2>
-
     <div class="c2d-rate-context">
-        <div class="c2d-rate-avatar">@Model.Seller.Username.Substring(0, 1).ToUpper()</div>
+        @if (!string.IsNullOrEmpty(Model.Seller?.ProfileImage))
+        {
+            <img class="c2d-rate-avatar" src="@Model.Seller.ProfileImage" alt="@Model.Seller.Username" />
+        }
+        else
+        {
+            <div class="c2d-rate-avatar">@Model.Seller.Username.Substring(0, 1).ToUpper()</div>
+        }
         <div>
             <div class="c2d-rate-seller">@Model.Seller.Username</div>
             <div class="c2d-rate-listing">@Model.Listing.Title</div>
         </div>
     </div>
-
     <form asp-controller="UserRating" asp-action="SubmitRating" method="post" id="rateForm">
         <input type="hidden" name="transactionId" value="@Model.Id" />
         <input type="hidden" name="score" id="scoreInput" value="" />
-
         <div class="c2d-rate-field">
             <label>Your rating</label>
             <div class="c2d-stars" id="starRow">
@@ -26,18 +29,15 @@
             </div>
             <div class="c2d-star-error" id="starError">Please select a rating.</div>
         </div>
-
         <div class="c2d-rate-field">
             <label for="comment">Comment (optional)</label>
             <textarea id="comment" name="comment" maxlength="500" rows="4"
                       placeholder="How was your experience?"></textarea>
             <div class="c2d-char-count"><span id="charCount">0</span> / 500</div>
         </div>
-
         <button type="submit" class="c2d-rate-submit">Submit rating</button>
     </form>
 </div>
-
 <script>
     (function () {
         const starRow = document.getElementById('starRow');
@@ -47,16 +47,13 @@
         const form = document.getElementById('rateForm');
         const comment = document.getElementById('comment');
         const charCount = document.getElementById('charCount');
-
         let selected = 0;
-
         function paint(upTo) {
             stars.forEach(function (s) {
                 const v = parseInt(s.dataset.value, 10);
                 s.classList.toggle('is-filled', v <= upTo);
             });
         }
-
         stars.forEach(function (star) {
             star.addEventListener('mouseenter', function () {
                 paint(parseInt(star.dataset.value, 10));
@@ -68,23 +65,18 @@
                 paint(selected);
             });
         });
-
         starRow.addEventListener('mouseleave', function () {
             paint(selected);
         });
-
         comment.addEventListener('input', function () {
             charCount.textContent = comment.value.length;
         });
-
         form.addEventListener('submit', function (e) {
             e.preventDefault();
-
             if (selected < 1 || selected > 5) {
                 starError.classList.add('is-visible');
                 return;
             }
-
             fetch(form.action, {
                 method: 'POST',
                 body: new FormData(form)
@@ -97,4 +89,4 @@
             });
         });
     })();
-</script>   
+</script>

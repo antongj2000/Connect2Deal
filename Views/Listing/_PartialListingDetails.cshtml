@@ -183,7 +183,14 @@ else
     <div class="c2d-detail-section">
         <h4>Seller</h4>
         <div class="c2d-detail-seller">
-            <div class="c2d-detail-avatar">@(Model.User?.Username?.Substring(0, 1).ToUpper() ?? "?")</div>
+            @if (!string.IsNullOrEmpty(Model.User?.ProfileImage))
+            {
+                <img class="c2d-detail-avatar" src="@Model.User.ProfileImage" alt="@Model.User.Username" />
+            }
+            else
+            {
+                <div class="c2d-detail-avatar">@(Model.User?.Username?.Substring(0, 1).ToUpper() ?? "?")</div>
+            }
             <div>
                 <div class="c2d-detail-seller-name">@(Model.User?.Username ?? "Unknown")</div>
                 <div class="c2d-detail-seller-since">Member since @(Model.User?.CreatedAt.ToString("MMM yyyy"))</div>

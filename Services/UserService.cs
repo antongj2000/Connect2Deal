@@ -166,6 +166,22 @@ namespace Connect2Deal.Services
             return true;
         }
 
+        #region Show user ratings
+
+        public async Task<List<UserRating>> GetRatingsForUser(int userId)
+        {
+            var ratings = await mycontext.UserRatings.Where(x=>x.RatedUserId == userId).Include(x=>x.Rater).OrderByDescending(x => x.CreatedAt).AsNoTracking().ToListAsync();
+            return ratings;
+        }
+
+
+
+        #endregion
+
+
+
+
+
         #endregion
     }
 }

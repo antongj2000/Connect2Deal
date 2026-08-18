@@ -1,0 +1,148 @@
+﻿@model Connect2Deal.ViewModels.SellerProfileView
+
+<div class="c2d-seller-profile">
+
+    <button type="button" class="c2d-seller-back" id="sellerBack">‹ Back to listing</button>
+
+    <div class="c2d-seller-head">
+        @if (!string.IsNullOrEmpty(Model.ProfileImage))
+        {
+            <img class="c2d-seller-avatar" src="@Model.ProfileImage" alt="@Model.Username" />
+        }
+        else
+        {
+            <div class="c2d-seller-avatar">@Model.Username.Substring(0, 1).ToUpper()</div>
+        }
+        <div>
+            <div class="c2d-seller-username">@Model.Username</div>
+            <div class="c2d-seller-realname">@Model.FirstName @Model.LastName</div>
+            <div class="c2d-seller-since">Member since @Model.MemberSince.ToString("MMM yyyy")</div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="c2d-seller-section">
+            <h4>About</h4>
+            <p class="c2d-seller-desc">@Model.Description</p>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.PhoneNumber))
+    {
+        <div class="c2d-seller-section">
+            <h4>Phone</h4>
+            <p class="c2d-seller-phone">@Model.PhoneNumber</p>
+        </div>
+    }
+
+    <hr class="c2d-detail-hr" />
+
+    <div class="c2d-seller-section">
+        <h4>Rating</h4>
+
+        @if (Model.RatingCount == 0)
+        {
+            <p class="c2d-seller-norating">No ratings yet.</p>
+        }
+        else
+        {
+            <div class="c2d-seller-score">
+                <span class="c2d-seller-avg">@Model.AverageScore.ToString("0.0")</span>
+                <span class="c2d-seller-stars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <span class="c2d-star @(i <= Math.Round(Model.AverageScore) ? "is-filled" : "")">★</span>
+                    }
+                </span>
+                <span class="c2d-seller-count">(@Model.RatingCount @(Model.RatingCount == 1 ? "rating" : "ratings"))</span>
+            </div>
+        }
+    </div>
+
+    @if (Model.RatingCount > 0)
+    {
+        <hr class="c2d-detail-hr" />
+
+        <div class="c2d-seller-section">
+            <h4>Comments</h4>
+
+            <div class="c2d-review-list" id="reviewList">
+                @{
+                    var index = 0;
+                }
+                @foreach (var r in Model.Ratings)
+                {
+                    var isExtra = index >= 3;
+                    <div class="c2d-review @(isExtra ? "is-extra is-hidden" : "")">
+                        <div class="c2d-review-head">
+                            @if (!string.IsNullOrEmpty(r.Rater?.ProfileImage))
+                            {
+                                <img class="c2d-review-avatar" src="@r.Rater.ProfileImage" alt="@r.Rater.Username" />
+                            }
+                            else
+                            {
+                                <div class="c2d-review-avatar">@(r.Rater?.Username?.Substring(0, 1).ToUpper() ?? "?")</div>
+                            }
+                            <div class="c2d-review-meta">
+                                <span class="c2d-review-name">@(r.Rater?.Username ?? "Unknown")</span>
+                                <span class="c2d-review-date">@r.CreatedAt.ToString("dd MMM yyyy")</span>
+                            </div>
+                            <span class="c2d-review-score">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="c2d-star @(i <= r.Score ? "is-filled" : "")">★</span>
+                                }
+                            </span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(r.Comment))
+                        {
+                            <p class="c2d-review-text">@r.Comment</p>
+                        }
+                    </div>
+                    index++;
+                }
+            </div>
+
+            @if (Model.Ratings.Count > 3)
+            {
+                <button type="button" class="c2d-review-more" id="reviewMore">
+                    View more (@(Model.Ratings.Count - 3))
+                </button>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    (function () {
+        const more = document.getElementById('reviewMore');
+        if (more) {
+            more.addEventListener('click', function () {
+                document.querySelectorAll('#reviewList .is-extra').forEach(function (el) {
+                    el.classList.remove('is-hidden');
+                });
+                more.remove();
+            });
+        }
+
+        const back = document.getElementById('sellerBack');
+        if (back) {
+            back.addEventListener('click', function () {
+                if (!window.c2dLastListingId) return;
+
+                fetch('/Listing/ListingDetails/' + window.c2dLastListingId)
+                    .then(function (res) {
+                        if (!res.ok) throw new Error('Failed');
+                        return res.text();
+                    })
+                    .then(function (html) {
+                        window.c2dSetModalContent(html);
+                    })
+                    .catch(function () {
+                        alert('Could not go back. Please close and try again.');
+                    });
+            });
+        }
+    })();
+</script>

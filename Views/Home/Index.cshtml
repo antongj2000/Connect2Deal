@@ -162,11 +162,23 @@
 
 </div>
 
-@section Scripts {
+   @section Scripts {
     <script>
         (function () {
             const modal      = document.getElementById('c2dModal');
             const modalBody  = document.getElementById('c2dModalContent');
+
+            // ---- ubacuje HTML u modal I izvršava skripte iz njega ----
+            function setModalContent(html) {
+                modalBody.innerHTML = html;
+                modalBody.querySelectorAll('script').forEach(function (old) {
+                    const s = document.createElement('script');
+                    s.textContent = old.textContent;
+                    old.replaceWith(s);
+                });
+            }
+
+            window.c2dSetModalContent = setModalContent;
 
             // ---- listing detail modal (otvaranje) ----
             document.querySelectorAll('[data-detail-id]').forEach(btn => {
@@ -178,9 +190,9 @@
                     document.body.style.overflow = 'hidden';
 
                     const response = await fetch(`/Listing/ListingDetails/${id}`);
-                    modalBody.innerHTML = response.ok
+                    setModalContent(response.ok
                         ? await response.text()
-                        : '<div class="c2d-modal-loading">Listing not found.</div>';
+                        : '<div class="c2d-modal-loading">Listing not found.</div>');
                 });
             });
 
@@ -194,9 +206,9 @@
                     document.body.style.overflow = 'hidden';
 
                     const response = await fetch(`/Listing/SelectBuyer?listingId=${id}`);
-                    modalBody.innerHTML = response.ok
+                    setModalContent(response.ok
                         ? await response.text()
-                        : '<div class="c2d-modal-loading">Greška pri učitavanju.</div>';
+                        : '<div class="c2d-modal-loading">Could not load.</div>');
 
                     if (response.ok) {
                         wireBuyerPicker();
@@ -236,7 +248,7 @@
                             location.reload();
                         } else {
                             confirmBtn.disabled = false;
-                            alert('Greška pri označavanju prodaje.');
+                            alert('Could not mark as sold.');
                         }
                     });
                 }
@@ -269,4 +281,5 @@
             });
         })();
     </script>
+}
 }

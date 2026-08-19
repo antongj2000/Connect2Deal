@@ -1116,6 +1116,20 @@ body {
     z-index: 1;
 }
 
+.c2d-auth-logo-img {
+    height: clamp(120px, 18vw, 280px);
+    width: auto;
+    max-width: 100%;
+    display: block;
+}
+
+
+.c2d-auth-form-logo {
+    height: 90px;
+    width: auto;
+    display: block;
+    margin: 0 auto 30px;
+}
 .c2d-auth-logo-mark {
     width: 38px;
     height: 38px;
@@ -2208,3 +2222,9 @@ img.c2d-rate-avatar {
     .c2d-review-more:hover {
         background: #f3f4fb;
     }
+
+.c2d-auth-logo-img {
+    height: 75px;
+    width: auto;
+    display: block;
+}

@@ -8,15 +8,10 @@
 
     <!-- ============ LEFT: BRAND ============ -->
     <div class="c2d-auth-brand">
-        <div class="c2d-auth-logo">
-            <span class="c2d-auth-logo-mark"></span>
-            <span class="c2d-auth-logo-name">Connect2Deal</span>
-        </div>
 
         <div class="c2d-auth-pitch">
             <h2>Start selling<br />in minutes.</h2>
             <p>Create an account and post your first listing today. No fees, no commission.</p>
-
             <ul class="c2d-auth-points">
                 <li>
                     <span class="c2d-auth-check">✓</span>
@@ -40,17 +35,13 @@
     <div class="c2d-auth-panel">
         <div class="c2d-auth-box">
 
+            <img src="~/img/c2d-logo-dark.png" alt="Connect2Deal" class="c2d-auth-form-logo" />
+
             <a class="c2d-auth-back" asp-controller="Home" asp-action="Index">
                 ‹ Back to marketplace
             </a>
 
-            <div class="c2d-auth-head">
-                <h1>Create your account</h1>
-                <p>It takes less than a minute.</p>
-            </div>
-
             <form asp-action="Registration" method="post">
-
                 <div asp-validation-summary="ModelOnly" class="c2d-auth-summary"></div>
 
                 <div class="c2d-auth-row">
@@ -59,7 +50,6 @@
                         <input asp-for="FirstName" placeholder="Marko" autocomplete="given-name" />
                         <span asp-validation-for="FirstName" class="c2d-auth-error"></span>
                     </div>
-
                     <div class="c2d-auth-field">
                         <label asp-for="LastName"></label>
                         <input asp-for="LastName" placeholder="Marković" autocomplete="family-name" />
@@ -92,7 +82,6 @@
                 Already have an account?
                 <a asp-controller="Account" asp-action="Login">Log in</a>
             </div>
-
         </div>
     </div>
 </div>

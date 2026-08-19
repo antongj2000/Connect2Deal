@@ -8,12 +8,10 @@
 
     <!-- ============ LEFT: BRAND ============ -->
     <div class="c2d-auth-brand">
-       
 
         <div class="c2d-auth-pitch">
             <h2>Buy and sell,<br />locally.</h2>
             <p>Balkans's marketplace — post what you don't need, find what you do.</p>
-
             <ul class="c2d-auth-points">
                 <li>
                     <span class="c2d-auth-check">✓</span>
@@ -37,31 +35,24 @@
     <div class="c2d-auth-panel">
         <div class="c2d-auth-box">
 
+            <img src="~/img/c2d-logo-dark.png" alt="Connect2Deal" class="c2d-auth-form-logo" />
+
             <a class="c2d-auth-back" asp-controller="Home" asp-action="Index">
                 ‹ Back to marketplace
             </a>
 
-            <div class="c2d-auth-head">
-                <h1>Welcome back</h1>
-                <p>Log in to post listings and message sellers.</p>
-            </div>
-
             <form asp-action="Login" method="post">
-
                 <div asp-validation-summary="ModelOnly" class="c2d-auth-summary"></div>
-
                 <div class="c2d-auth-field">
                     <label asp-for="Username"></label>
                     <input asp-for="Username" placeholder="your username" autocomplete="username" />
                     <span asp-validation-for="Username" class="c2d-auth-error"></span>
                 </div>
-
                 <div class="c2d-auth-field">
                     <label asp-for="Password"></label>
                     <input asp-for="Password" type="password" placeholder="••••••••" autocomplete="current-password" />
                     <span asp-validation-for="Password" class="c2d-auth-error"></span>
                 </div>
-
                 <button type="submit" class="c2d-auth-btn">Log in</button>
             </form>
 
@@ -69,7 +60,6 @@
                 Don't have an account?
                 <a asp-controller="Account" asp-action="Registration">Sign up</a>
             </div>
-
         </div>
     </div>
 </div>

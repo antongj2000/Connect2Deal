@@ -33,23 +33,30 @@ namespace Connect2Deal.Controllers
             return View(conversations);
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Conversation(int id)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var belongs = await _chatService.UserBelongToConversation(userId, id);
-            if (!belongs)
+            var conversation = await _chatService.GetConversationById(id);
+            if (conversation == null)
+            {
+                return NotFound();
+            }
+
+            if (conversation.User1Id != userId && conversation.User2Id != userId)
             {
                 return Forbid();
             }
 
+            var otherUser = conversation.User1Id == userId ? conversation.User2 : conversation.User1;
+
             var messages = await _chatService.GetMessagesFromConversation(id);
+            await _chatService.MarkAsRead(id, userId);
 
-            await _chatService.MarkAsRead(id, userId);     
-
-            ViewData["ConversationId"] = id;  
+            ViewData["ConversationId"] = id;
+            ViewData["OtherName"] = otherUser?.Username ?? "Conversation";
+            ViewData["OtherImage"] = otherUser?.ProfileImage;
 
             return View(messages);
         }

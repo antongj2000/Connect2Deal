@@ -8,8 +8,8 @@
     int myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     int conversationId = (int)ViewData["ConversationId"];
 
-    var otherUser = Model.FirstOrDefault(m => m.SenderId != myId)?.Sender;
-    var otherName = otherUser?.Username ?? "Conversation";
+    var otherName = (string)ViewData["OtherName"];
+    var otherImage = ViewData["OtherImage"] as string;
     var otherInitial = otherName.Substring(0, 1).ToUpper();
 }
 
@@ -35,9 +35,9 @@
 
             <div class="c2d-chat-head">
                 <a class="c2d-chat-back" asp-controller="Chat" asp-action="Inbox">‹</a>
-                @if (!string.IsNullOrEmpty(otherUser?.ProfileImage))
+                @if (!string.IsNullOrEmpty(otherImage))
                 {
-                    <img class="c2d-chat-avatar" src="@otherUser.ProfileImage" alt="@otherName" />
+                    <img class="c2d-chat-avatar" src="@otherImage" alt="@otherName" />
                 }
                 else
                 {

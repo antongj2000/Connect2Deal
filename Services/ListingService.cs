@@ -317,7 +317,47 @@ namespace Connect2Deal.Services
 
 
 
+        #region Filtriranje oglasa
 
+
+        public async Task<List<Listing>> GetFilteredListings(string? search = null,int? countryId = null,int? cityId = null,int? categoryId = null, int? subcategoryId = null)
+        {
+            var query = mycontext.Listings
+                .Where(l => l.Status == "Active");
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var pattern = $"%{search.Trim()}%";
+                query = query.Where(l => EF.Functions.ILike(l.Title, pattern)
+                                      || EF.Functions.ILike(l.Description, pattern));
+            }
+            if (cityId != null)
+            {
+                query = query.Where(l => l.LocationId == cityId);
+            }
+            else if (countryId != null)
+            {
+                query = query.Where(l => l.Location.ParentId == countryId);
+            }
+
+            if (subcategoryId != null)
+            {
+                query = query.Where(l => l.CategoryId == subcategoryId);
+            }
+            else if (categoryId != null)
+            {
+                query = query.Where(l => l.Category.ParentId == categoryId);
+            }
+            return await query
+                .Include(l => l.Category)
+                .Include(l => l.Location)
+                .Include(l => l.ListingImages)
+                .OrderByDescending(l => l.CreatedAt)
+                .ToListAsync();
+        }
+
+
+        #endregion
 
 
     }

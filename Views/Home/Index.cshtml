@@ -1,5 +1,5 @@
 ﻿@using System.Security.Claims
-@model List<Connect2Deal.Models.Listing>
+@model Connect2Deal.ViewModels.FilterListings
 @{
     ViewData["Title"] = "Marketplace";
     ViewData["HideChrome"] = true;
@@ -18,37 +18,63 @@
 
     <main class="c2d-main">
 
-        <header class="c2d-topbar">
-            <div class="c2d-topbar-left">
-                <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
-                    <span></span><span></span><span></span>
-                </button>
-                <div>
-                    <h1 class="c2d-title">
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            @($"Welcome back, {User.Identity.Name}")
-                        }
-                        else
-                        {
-                            @:Marketplace
-                        }
-                    </h1>
-                    <p class="c2d-subtitle">Fresh listings from across Montenegro.</p>
-                </div>
-            </div>
+        <div class="c2d-toolbar">
+            <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
 
-            <a class="c2d-cta" asp-controller="Listing" asp-action="CreateListing">
-                <span>＋</span> Post a listing
-            </a>
-        </header>
+            @if (Model.Countries.Any())
+            {
+                <form class="c2d-filters" method="get" asp-controller="Home" asp-action="Index">
+
+                    <input type="text" name="search" class="c2d-filter-search"
+                           placeholder="Search listings..." value="@Model.Search" />
+
+                    <select name="countryId" id="filterCountry" class="c2d-filter-select">
+                        <option value="">All countries</option>
+                        @foreach (var c in Model.Countries)
+                        {
+                            <option value="@c.Value" selected="@(Model.CountryId?.ToString() == c.Value)">@c.Text</option>
+                        }
+                    </select>
+
+                    <select name="cityId" id="filterCity" class="c2d-filter-select">
+                        <option value="">All cities</option>
+                        @foreach (var c in Model.Cities)
+                        {
+                            <option value="@c.Value" selected="@(Model.CityId?.ToString() == c.Value)">@c.Text</option>
+                        }
+                    </select>
+
+                    <select name="categoryId" id="filterCategory" class="c2d-filter-select">
+                        <option value="">All categories</option>
+                        @foreach (var c in Model.Categories)
+                        {
+                            <option value="@c.Value" selected="@(Model.CategoryId?.ToString() == c.Value)">@c.Text</option>
+                        }
+                    </select>
+
+                    <select name="subcategoryId" id="filterSubcategory" class="c2d-filter-select">
+                        <option value="">All subcategories</option>
+                        @foreach (var c in Model.Subcategories)
+                        {
+                            <option value="@c.Value" selected="@(Model.SubcategoryId?.ToString() == c.Value)">@c.Text</option>
+                        }
+                    </select>
+
+                    <button type="submit" class="c2d-filter-btn">Search</button>
+                    <a class="c2d-filter-reset" asp-controller="Home" asp-action="Index">Reset</a>
+
+                </form>
+            }
+        </div>
 
         <div class="c2d-section-head">
             <h2 class="c2d-section-title">Latest listings</h2>
-            <span class="c2d-count">@Model.Count total</span>
+            <span class="c2d-count">@Model.Listings.Count total</span>
         </div>
 
-        @if (!Model.Any())
+        @if (!Model.Listings.Any())
         {
             <div class="c2d-empty">
                 <div class="c2d-empty-mark">▤</div>
@@ -62,7 +88,7 @@
         else
         {
             <div class="c2d-grid">
-                @foreach (var listing in Model)
+                @foreach (var listing in Model.Listings)
                 {
                     var cat = listing.Category?.Name ?? "Other";
                     var hue = System.Math.Abs(cat.GetHashCode()) % 360;
@@ -182,6 +208,40 @@
             function openModal() {
                 modal.classList.add('is-open');
                 document.body.style.overflow = 'hidden';
+            }
+
+            // ---- ulančavanje: država -> gradovi, kategorija -> podkategorije ----
+            const countrySel = document.getElementById('filterCountry');
+            const citySel    = document.getElementById('filterCity');
+            const catSel     = document.getElementById('filterCategory');
+            const subSel     = document.getElementById('filterSubcategory');
+
+            async function fillChildren(parentId, targetSelect, url, emptyLabel) {
+                targetSelect.innerHTML = '<option value="">' + emptyLabel + '</option>';
+                if (!parentId) return;
+
+                const response = await fetch(url + parentId);
+                if (!response.ok) return;
+
+                const items = await response.json();
+                items.forEach(function (i) {
+                    const opt = document.createElement('option');
+                    opt.value = i.id;
+                    opt.textContent = i.name;
+                    targetSelect.appendChild(opt);
+                });
+            }
+
+            if (countrySel) {
+                countrySel.addEventListener('change', function () {
+                    fillChildren(countrySel.value, citySel, '/Home/GetCities?countryId=', 'All cities');
+                });
+            }
+
+            if (catSel) {
+                catSel.addEventListener('change', function () {
+                    fillChildren(catSel.value, subSel, '/Home/GetSubcategories?categoryId=', 'All subcategories');
+                });
             }
 
             // ---- listing detail modal (otvaranje) ----

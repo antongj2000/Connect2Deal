@@ -62,13 +62,16 @@ namespace Connect2Deal.Services
         }
 
 
-        public async Task<Message> CreateMessage(int conId, int senderId, string content)
+        public async Task<Message> CreateMessage(int conId, int senderId, string content,
+                                            int? listingId = null, string? messageType = null)
         {
             var newMessage = new Message
             {
                 ConversationId = conId,
                 SenderId = senderId,
-                Content = content
+                Content = content,
+                ListingId = listingId,
+                MessageType = messageType
             };
             mycontext.Messages.Add(newMessage);
             await mycontext.SaveChangesAsync();
@@ -110,11 +113,13 @@ namespace Connect2Deal.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Message>> GetMessagesFromConversation (int conversationId)
+        public async Task<List<Message>> GetMessagesFromConversation(int conversationId)
         {
             return await mycontext.Messages
                 .Where(m => m.ConversationId == conversationId)
                 .Include(m => m.Sender)
+                .Include(m => m.Listing)
+                    .ThenInclude(l => l.ListingImages)
                 .OrderBy(m => m.CreatedAt)
                 .ToListAsync();
         }

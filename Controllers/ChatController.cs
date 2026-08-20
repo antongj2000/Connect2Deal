@@ -1,7 +1,10 @@
-﻿using Connect2Deal.Models;
+﻿using Connect2Deal.Constants;
+using Connect2Deal.Hubs;
+using Connect2Deal.Models;
 using Connect2Deal.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 
@@ -13,10 +16,14 @@ namespace Connect2Deal.Controllers
     {
 
         private readonly ChatService _chatService;
+        private readonly ListingService _listingService;
+        private readonly IHubContext<ChatHub> _hub;
 
-        public ChatController(ChatService chatService)
+        public ChatController(ChatService chatService, ListingService listingService, IHubContext<ChatHub> hub)
         {
             _chatService = chatService;
+            _listingService = listingService;
+            _hub = hub;
         }
 
         [HttpGet]
@@ -89,8 +96,73 @@ namespace Connect2Deal.Controllers
 
         }
 
-       
 
+        [HttpGet]
+        public async Task<IActionResult> MessageSeller(int listingId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var listing = await _listingService.GetListingById(listingId);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            if (listing.UserId == userId)
+            {
+                return Forbid();
+            }
+
+            return PartialView("_MessageSeller", listing);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendListingInquiry(int listingId, string content)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return BadRequest();
+            }
+
+            var listing = await _listingService.GetListingById(listingId);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            if (listing.UserId == userId)
+            {
+                return Forbid();
+            }
+
+            var conversation = await _chatService.GetOrCreateConversation(userId, listing.UserId);
+
+            await _chatService.CreateMessage(conversation.Id, userId, content.Trim(),
+                                             listingId, MessageTypes.ListingInquiry);
+
+            var cover = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
+                        ?? listing.ListingImages?.FirstOrDefault();
+
+            await _hub.Clients.Group($"conversation-{conversation.Id}").SendAsync("ReceiveMessage", new
+            {
+                senderId = userId,
+                content = content.Trim(),
+                createdAt = DateTime.UtcNow.ToString("HH:mm"),
+                listingId = listing.Id,
+                listingTitle = listing.Title,
+                listingPrice = (listing.Price?.ToString("N0") ?? "0") + " €",
+                listingImage = cover?.ImagePath
+            });
+
+            await _hub.Clients.Group($"user-{listing.UserId}")
+                .SendAsync("InboxUpdate", new { conversationId = conversation.Id });
+
+            return Json(new { conversationId = conversation.Id });
+        }
 
 
 

@@ -130,17 +130,16 @@
 
                                 @if (myId != null && listing.UserId != myId)
                                 {
-                                    <a class="c2d-msg-btn"
-                                       asp-controller="Chat" asp-action="StartConversation"
-                                       asp-route-sellerId="@listing.UserId"
-                                       title="Message seller"
-                                       onclick="event.stopPropagation();">
+                                    <button type="button" class="c2d-msg-btn"
+                                            data-msg-listing="@listing.Id"
+                                            title="Message seller"
+                                            onclick="event.stopPropagation();">
                                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
                                              stroke="currentColor" stroke-width="2"
                                              stroke-linecap="round" stroke-linejoin="round">
                                             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
                                         </svg>
-                                    </a>
+                                    </button>
                                 }
                             </div>
                         </div>
@@ -162,7 +161,7 @@
 
 </div>
 
-   @section Scripts {
+@section Scripts {
     <script>
         (function () {
             const modal      = document.getElementById('c2dModal');
@@ -180,19 +179,38 @@
 
             window.c2dSetModalContent = setModalContent;
 
+            function openModal() {
+                modal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+            }
+
             // ---- listing detail modal (otvaranje) ----
             document.querySelectorAll('[data-detail-id]').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const id = btn.getAttribute('data-detail-id');
 
                     modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
-                    modal.classList.add('is-open');
-                    document.body.style.overflow = 'hidden';
+                    openModal();
 
                     const response = await fetch(`/Listing/ListingDetails/${id}`);
                     setModalContent(response.ok
                         ? await response.text()
                         : '<div class="c2d-modal-loading">Listing not found.</div>');
+                });
+            });
+
+            // ---- message seller (otvara modal sa porukom) ----
+            document.querySelectorAll('[data-msg-listing]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const id = btn.getAttribute('data-msg-listing');
+
+                    modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                    openModal();
+
+                    const response = await fetch(`/Chat/MessageSeller?listingId=${id}`);
+                    setModalContent(response.ok
+                        ? await response.text()
+                        : '<div class="c2d-modal-loading">Could not load.</div>');
                 });
             });
 
@@ -202,8 +220,7 @@
                     const id = btn.getAttribute('data-sold-id');
 
                     modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
-                    modal.classList.add('is-open');
-                    document.body.style.overflow = 'hidden';
+                    openModal();
 
                     const response = await fetch(`/Listing/SelectBuyer?listingId=${id}`);
                     setModalContent(response.ok
@@ -281,5 +298,4 @@
             });
         })();
     </script>
-}
 }

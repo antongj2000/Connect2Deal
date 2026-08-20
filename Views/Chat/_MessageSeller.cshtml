@@ -1,0 +1,89 @@
+﻿@model Connect2Deal.Models.Listing
+@{
+    var cover = Model.ListingImages?.FirstOrDefault(i => i.IsPrimary)
+                ?? Model.ListingImages?.FirstOrDefault();
+}
+
+<div class="c2d-msgseller">
+
+    <h3 class="c2d-msgseller-title">Message seller</h3>
+
+    <div class="c2d-msgseller-label">About this listing</div>
+
+    <div class="c2d-msgseller-listing">
+        @if (cover != null)
+        {
+            <img class="c2d-msgseller-thumb" src="@cover.ImagePath" alt="@Model.Title" />
+        }
+        else
+        {
+            <div class="c2d-msgseller-thumb c2d-msgseller-thumb-empty">▤</div>
+        }
+        <div class="c2d-msgseller-info">
+            <div class="c2d-msgseller-name">@Model.Title</div>
+            <div class="c2d-msgseller-price">@(Model.Price?.ToString("N0") ?? "0") €</div>
+        </div>
+    </div>
+
+    <form id="msgSellerForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="listingId" value="@Model.Id" />
+
+        <label class="c2d-msgseller-label" for="msgSellerText">Your message</label>
+        <textarea id="msgSellerText" name="content" class="c2d-msgseller-text" rows="4"
+                  placeholder="Write a message...">Hello, I am interested in this listing.</textarea>
+
+        <div class="c2d-msgseller-error" id="msgSellerError">Message cannot be empty.</div>
+
+        <button type="submit" class="c2d-msgseller-send">Send</button>
+    </form>
+
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById('msgSellerForm');
+        var err = document.getElementById('msgSellerError');
+        if (!form) return;
+
+        var box = document.getElementById('msgSellerText');
+        box.focus();
+        box.setSelectionRange(box.value.length, box.value.length);
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            var text = box.value.trim();
+            if (!text) {
+                err.textContent = 'Message cannot be empty.';
+                err.classList.add('is-visible');
+                return;
+            }
+            err.classList.remove('is-visible');
+
+            var btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+
+            fetch('/Chat/SendListingInquiry', {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(function (r) {
+                if (!r.ok) throw new Error('failed');
+                return r.json();
+            })
+            .then(function (data) {
+                if (data.conversationId) {
+                    window.location = '/Chat/Conversation/' + data.conversationId;
+                } else {
+                    btn.disabled = false;
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                err.textContent = 'Could not send the message.';
+                err.classList.add('is-visible');
+            });
+        });
+    })();
+</script>

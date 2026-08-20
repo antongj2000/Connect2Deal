@@ -56,8 +56,30 @@
                     @foreach (var msg in Model)
                     {
                         var isMine = msg.SenderId == myId;
+                        var cover = msg.Listing?.ListingImages?.FirstOrDefault(i => i.IsPrimary)
+                        ?? msg.Listing?.ListingImages?.FirstOrDefault();
+
                         <div class="c2d-bubble-row @(isMine ? "is-mine" : "")">
                             <div class="c2d-bubble @(isMine ? "is-mine" : "is-theirs")">
+
+                                @if (msg.Listing != null)
+                                {
+                                    <button type="button" class="c2d-bubble-listing" data-detail-id="@msg.Listing.Id">
+                                        @if (cover != null)
+                                        {
+                                            <img class="c2d-bubble-listing-thumb" src="@cover.ImagePath" alt="@msg.Listing.Title" />
+                                        }
+                                        else
+                                        {
+                                            <span class="c2d-bubble-listing-thumb c2d-bubble-listing-empty">▤</span>
+                                        }
+                                        <span class="c2d-bubble-listing-info">
+                                            <span class="c2d-bubble-listing-title">@msg.Listing.Title</span>
+                                            <span class="c2d-bubble-listing-price">@(msg.Listing.Price?.ToString("N0") ?? "0") €</span>
+                                        </span>
+                                    </button>
+                                }
+
                                 @msg.Content
                                 <span class="c2d-bubble-time">@msg.CreatedAt.ToString("HH:mm")</span>
                             </div>
@@ -77,6 +99,16 @@
 
         </div>
     </main>
+
+    <!-- ============ DETAIL MODAL ============ -->
+    <div class="c2d-modal-overlay" id="c2dModal">
+        <div class="c2d-modal">
+            <button class="c2d-modal-close" id="c2dModalClose">✕</button>
+            <div class="c2d-modal-content" id="c2dModalContent">
+            </div>
+        </div>
+    </div>
+
 </div>
 @section Scripts {
     <script>
@@ -94,7 +126,7 @@
             const connection = window.c2dConnection;
 
             connection.on("ReceiveMessage", function (msg) {
-                addBubble(msg.senderId, msg.content, msg.createdAt);
+                addBubble(msg);
 
                 if (msg.senderId !== myId && document.hasFocus()) {
                     connection.invoke("MarkRead", conversationId)
@@ -120,22 +152,64 @@
         });
 
         // ---------- crtanje balončića ----------
-        function addBubble(senderId, content, time) {
+        function addBubble(msg) {
             const empty = chatBody.querySelector('.c2d-chat-empty');
             if (empty) empty.remove();
 
-            const isMine = senderId === myId;
+            const isMine = msg.senderId === myId;
 
             const row = document.createElement('div');
             row.className = 'c2d-bubble-row' + (isMine ? ' is-mine' : '');
 
             const bubble = document.createElement('div');
             bubble.className = 'c2d-bubble ' + (isMine ? 'is-mine' : 'is-theirs');
-            bubble.textContent = content;
+
+            if (msg.listingId) {
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'c2d-bubble-listing';
+                card.setAttribute('data-detail-id', msg.listingId);
+
+                if (msg.listingImage) {
+                    const img = document.createElement('img');
+                    img.className = 'c2d-bubble-listing-thumb';
+                    img.src = msg.listingImage;
+                    img.alt = msg.listingTitle || '';
+                    card.appendChild(img);
+                } else {
+                    const ph = document.createElement('span');
+                    ph.className = 'c2d-bubble-listing-thumb c2d-bubble-listing-empty';
+                    ph.textContent = '▤';
+                    card.appendChild(ph);
+                }
+
+                const info = document.createElement('span');
+                info.className = 'c2d-bubble-listing-info';
+
+                const title = document.createElement('span');
+                title.className = 'c2d-bubble-listing-title';
+                title.textContent = msg.listingTitle || '';
+
+                const price = document.createElement('span');
+                price.className = 'c2d-bubble-listing-price';
+                price.textContent = msg.listingPrice || '';
+
+                info.appendChild(title);
+                info.appendChild(price);
+                card.appendChild(info);
+
+                card.addEventListener('click', function () {
+                    if (window.c2dOpenListing) window.c2dOpenListing(msg.listingId);
+                });
+
+                bubble.appendChild(card);
+            }
+
+            bubble.appendChild(document.createTextNode(msg.content));
 
             const stamp = document.createElement('span');
             stamp.className = 'c2d-bubble-time';
-            stamp.textContent = time;
+            stamp.textContent = msg.createdAt;
 
             bubble.appendChild(stamp);
             row.appendChild(bubble);
@@ -146,5 +220,56 @@
 
         // skrol na dno pri učitavanju
         chatBody.scrollTop = chatBody.scrollHeight;
+
+        // ---------- listing detail modal ----------
+        (function () {
+            const modal = document.getElementById('c2dModal');
+            const modalBody = document.getElementById('c2dModalContent');
+
+            function setModalContent(html) {
+                modalBody.innerHTML = html;
+                modalBody.querySelectorAll('script').forEach(function (old) {
+                    const s = document.createElement('script');
+                    s.textContent = old.textContent;
+                    old.replaceWith(s);
+                });
+            }
+
+            window.c2dSetModalContent = setModalContent;
+
+            function closeModal() {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+
+            document.getElementById('c2dModalClose').addEventListener('click', closeModal);
+
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeModal();
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            window.c2dOpenListing = async function (id) {
+                window.c2dLastListingId = id;
+
+                modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                modal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+
+                const response = await fetch('/Listing/ListingDetails/' + id);
+                setModalContent(response.ok
+                    ? await response.text()
+                    : '<div class="c2d-modal-loading">Listing not found.</div>');
+            };
+
+            document.querySelectorAll('[data-detail-id]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    window.c2dOpenListing(btn.getAttribute('data-detail-id'));
+                });
+            });
+        })();
     </script>
 }

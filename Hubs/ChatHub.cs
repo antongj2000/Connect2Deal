@@ -49,7 +49,11 @@ namespace Connect2Deal.Hubs
             {
                 senderId = userId,
                 content = content,
-                createdAt = DateTime.UtcNow.ToString("HH:mm")
+                createdAt = DateTime.UtcNow.ToString("HH:mm"),
+                listingId = (int?)null,
+                listingTitle = (string?)null,
+                listingPrice = (string?)null,
+                listingImage = (string?)null
             });
 
             var otherUserId = await _chatService.GetOtherUserId(conversationId, userId);

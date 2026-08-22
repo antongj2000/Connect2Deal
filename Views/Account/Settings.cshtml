@@ -1,6 +1,8 @@
 ﻿@using System.Security.Claims
+@using Connect2Deal.Constants
 @model Connect2Deal.ViewModels.UpdateProfileDetails
 @{
+    var currentLanguage = ViewData["PreferredLanguage"] as string ?? "en";
     ViewData["Title"] = "Settings";
     ViewData["HideChrome"] = true;
     ViewData["ActivePage"] = "Settings";
@@ -115,6 +117,28 @@
                     </div>
 
                     <button type="submit" class="c2d-settings-submit">Change password</button>
+                </form>
+            </div>
+
+            <div class="c2d-settings-card">
+                <h2 class="c2d-settings-heading">Language</h2>
+
+                <form asp-controller="Account" asp-action="UpdateLanguage" method="post">
+
+                    <div class="c2d-settings-field">
+                        <label for="preferredLanguage">Preferred language</label>
+                        <select id="preferredLanguage" name="preferredLanguage">
+                            @foreach (var lang in Languages.All)
+                            {
+                                <option value="@lang.Key" selected="@(currentLanguage == lang.Key)">@lang.Value</option>
+                            }
+                        </select>
+                        <div class="c2d-file-hint">
+                            Messages written in another language will show a Translate button.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="c2d-settings-submit">Save language</button>
                 </form>
             </div>
 

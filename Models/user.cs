@@ -59,6 +59,10 @@ public partial class User
     [Column("is_blocked")]
     public bool IsBlocked { get; set; }
 
+    [Column("preferred_language")]
+    [StringLength(10)]
+    public string PreferredLanguage { get; set; } = null!;
+
     [InverseProperty("User1")]
     public virtual ICollection<Conversation> ConversationUser1s { get; set; } = new List<Conversation>();
 

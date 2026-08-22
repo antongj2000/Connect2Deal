@@ -4,6 +4,7 @@
     ViewData["Title"] = "Chat";
     ViewData["HideChrome"] = true;
     ViewData["ActivePage"] = "Messages";
+    var canTranslate = ViewData["CanTranslate"] as bool? ?? false;
 
     int myId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
     int conversationId = (int)ViewData["ConversationId"];
@@ -14,6 +15,8 @@
 }
 
 <div class="c2d-shell" id="c2dShell">
+
+    @Html.AntiForgeryToken()
 
     <partial name="_Sidebar" />
 
@@ -82,6 +85,14 @@
 
                                 @msg.Content
                                 <span class="c2d-bubble-time">@msg.CreatedAt.ToString("HH:mm")</span>
+
+                                @if (canTranslate && !isMine)
+                                {
+                                    <button type="button" class="c2d-translate-btn" data-translate-id="@msg.Id">
+                                        Translate
+                                    </button>
+                                    <div class="c2d-translation" id="translation-@msg.Id"></div>
+                                }
                             </div>
                         </div>
                     }
@@ -114,6 +125,7 @@
     <script>
         const conversationId = @conversationId;
         const myId = @myId;
+        const canTranslate = @canTranslate.ToString().ToLower();
 
         window.c2dActiveConversation = conversationId;
 
@@ -210,8 +222,23 @@
             const stamp = document.createElement('span');
             stamp.className = 'c2d-bubble-time';
             stamp.textContent = msg.createdAt;
-
             bubble.appendChild(stamp);
+
+            if (canTranslate && !isMine && msg.messageId) {
+                const tBtn = document.createElement('button');
+                tBtn.type = 'button';
+                tBtn.className = 'c2d-translate-btn';
+                tBtn.setAttribute('data-translate-id', msg.messageId);
+                tBtn.textContent = 'Translate';
+
+                const tDiv = document.createElement('div');
+                tDiv.className = 'c2d-translation';
+                tDiv.id = 'translation-' + msg.messageId;
+
+                bubble.appendChild(tBtn);
+                bubble.appendChild(tDiv);
+            }
+
             row.appendChild(bubble);
             chatBody.appendChild(row);
 
@@ -220,6 +247,53 @@
 
         // skrol na dno pri učitavanju
         chatBody.scrollTop = chatBody.scrollHeight;
+
+        // ---------- prevod poruka ----------
+        (function () {
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+
+            document.addEventListener('click', async function (e) {
+                const btn = e.target.closest('[data-translate-id]');
+                if (!btn) return;
+
+                const id = btn.getAttribute('data-translate-id');
+                const target = document.getElementById('translation-' + id);
+                if (!target) return;
+
+                if (target.textContent.trim()) {
+                    target.textContent = '';
+                    btn.textContent = 'Translate';
+                    return;
+                }
+
+                btn.disabled = true;
+                btn.textContent = 'Translating...';
+
+                try {
+                    const body = new FormData();
+                    body.append('messageId', id);
+                    if (tokenInput) {
+                        body.append('__RequestVerificationToken', tokenInput.value);
+                    }
+
+                    const response = await fetch('/Chat/TranslateMessage', {
+                        method: 'POST',
+                        body: body
+                    });
+
+                    if (!response.ok) throw new Error('failed');
+
+                    const data = await response.json();
+                    target.textContent = data.translation;
+                    btn.textContent = 'Hide translation';
+                } catch {
+                    target.textContent = 'Translation unavailable.';
+                    btn.textContent = 'Translate';
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        })();
 
         // ---------- listing detail modal ----------
         (function () {

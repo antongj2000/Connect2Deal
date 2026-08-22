@@ -1,11 +1,12 @@
-﻿using Connect2Deal.Data;
+﻿using Connect2Deal.Constants;
+using Connect2Deal.Data;
 using Connect2Deal.Models;
 using Connect2Deal.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
+using System.ComponentModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.ComponentModel;
+using System.Text;
 
 namespace Connect2Deal.Services
 {
@@ -144,6 +145,28 @@ namespace Connect2Deal.Services
 
             return true;
         }
+
+
+
+        public async Task<bool> UpdateLanguage(int userId, string language)
+        {
+            if (!Languages.IsValid(language))
+            {
+                return false;
+            }
+
+            var user = await mycontext.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.PreferredLanguage = language;
+            await mycontext.SaveChangesAsync();
+            return true;
+        }
+
+
 
 
         public async Task<bool> ChangePassword(int userId, string currentPassword, string newPassword)

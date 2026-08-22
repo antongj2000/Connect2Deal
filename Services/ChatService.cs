@@ -124,6 +124,16 @@ namespace Connect2Deal.Services
                 .ToListAsync();
         }
 
+
+        public async Task<Message?> GetMessageForUser(int messageId, int userId)
+        {
+            return await mycontext.Messages
+                .Include(m => m.Conversation)
+                .FirstOrDefaultAsync(m => m.Id == messageId
+                                      && (m.Conversation.User1Id == userId
+                                       || m.Conversation.User2Id == userId));
+        }
+
         public async Task<Conversation?> GetConversationById(int conversationId)
         {
             return await mycontext.Conversations

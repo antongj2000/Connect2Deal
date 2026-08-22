@@ -18,7 +18,7 @@ builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<UserRatingService>();
 builder.Services.AddSignalR();
-
+builder.Services.AddHttpClient<AiService>();
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

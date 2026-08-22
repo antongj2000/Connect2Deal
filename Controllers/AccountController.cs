@@ -159,8 +159,33 @@ namespace Connect2Deal.Controllers
                 Description = user.Description
             };
 
+            ViewData["PreferredLanguage"] = user.PreferredLanguage;
             return View(model);
         }
+
+
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateLanguage(string preferredLanguage)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            bool ok = await _userService.UpdateLanguage(userId, preferredLanguage);
+
+            if (ok)
+            {
+                TempData["SettingsSuccess"] = "Language updated.";
+            }
+            else
+            {
+                TempData["SettingsError"] = "Could not update language.";
+            }
+
+            return RedirectToAction("Settings");
+        }
+
 
 
         [Authorize]

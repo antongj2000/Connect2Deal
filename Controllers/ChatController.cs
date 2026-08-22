@@ -14,16 +14,20 @@ namespace Connect2Deal.Controllers
     [Authorize]
     public class ChatController : Controller
     {
-
         private readonly ChatService _chatService;
         private readonly ListingService _listingService;
         private readonly IHubContext<ChatHub> _hub;
+        private readonly AiService _aiService;
+        private readonly UserService _userService;
 
-        public ChatController(ChatService chatService, ListingService listingService, IHubContext<ChatHub> hub)
+        public ChatController(ChatService chatService, ListingService listingService,
+                             IHubContext<ChatHub> hub, AiService aiService, UserService userService)
         {
             _chatService = chatService;
             _listingService = listingService;
             _hub = hub;
+            _aiService = aiService;
+            _userService = userService;
         }
 
         [HttpGet]
@@ -57,6 +61,14 @@ namespace Connect2Deal.Controllers
             }
 
             var otherUser = conversation.User1Id == userId ? conversation.User2 : conversation.User1;
+
+
+            var me = await _userService.getUserById(userId);
+            bool canTranslate = otherUser != null
+                                && me.PreferredLanguage != otherUser.PreferredLanguage;
+
+            ViewData["CanTranslate"] = canTranslate;
+
 
             var messages = await _chatService.GetMessagesFromConversation(id);
             await _chatService.MarkAsRead(id, userId);
@@ -141,14 +153,15 @@ namespace Connect2Deal.Controllers
 
             var conversation = await _chatService.GetOrCreateConversation(userId, listing.UserId);
 
-            await _chatService.CreateMessage(conversation.Id, userId, content.Trim(),
-                                             listingId, MessageTypes.ListingInquiry);
+            var created = await _chatService.CreateMessage(conversation.Id, userId, content.Trim(),
+                                                           listingId, MessageTypes.ListingInquiry);
 
             var cover = listing.ListingImages?.FirstOrDefault(i => i.IsPrimary)
                         ?? listing.ListingImages?.FirstOrDefault();
 
             await _hub.Clients.Group($"conversation-{conversation.Id}").SendAsync("ReceiveMessage", new
             {
+                messageId = created.Id,
                 senderId = userId,
                 content = content.Trim(),
                 createdAt = DateTime.UtcNow.ToString("HH:mm"),
@@ -166,6 +179,43 @@ namespace Connect2Deal.Controllers
 
 
 
-    }
+        #region AI CONTROLLER FOR TRANSLATING MESSAGES
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TranslateMessage(int messageId)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var message = await _chatService.GetMessageForUser(messageId, userId);
+            if (message == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrWhiteSpace(message.Content))
+            {
+                return BadRequest();
+            }
+
+            var me = await _userService.getUserById(userId);
+            var targetLanguage = Languages.DisplayName(me.PreferredLanguage);
+
+            var translation = await _aiService.Translate(message.Content, targetLanguage);
+
+            if (translation == null)
+            {
+                return StatusCode(503);
+            }
+
+            return Json(new { translation });
+        }
+
+
+
+
+        #endregion
 
     }
+
+}

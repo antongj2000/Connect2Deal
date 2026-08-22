@@ -182,6 +182,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
             entity.Property(e => e.IsBlocked).HasDefaultValue(false);
             entity.Property(e => e.IsEmailVerified).HasDefaultValue(false);
+            entity.Property(e => e.PreferredLanguage).HasDefaultValueSql("'en'::character varying");
             entity.Property(e => e.Role).HasDefaultValueSql("'User'::character varying");
         });
 

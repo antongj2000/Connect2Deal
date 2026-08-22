@@ -1,6 +1,7 @@
 ﻿using Connect2Deal.Models;
 using Connect2Deal.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.VisualBasic;
@@ -37,16 +38,16 @@ namespace Connect2Deal.Hubs
             int userId = int.Parse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var belongs = await _chatService.UserBelongToConversation(userId, conversationId);
-
             if (!belongs)
             {
                 return;
             }
 
-            await _chatService.CreateMessage(conversationId, userId, content);
+            var created = await _chatService.CreateMessage(conversationId, userId, content);
 
             await Clients.Group($"conversation-{conversationId}").SendAsync("ReceiveMessage", new
             {
+                messageId = created.Id,
                 senderId = userId,
                 content = content,
                 createdAt = DateTime.UtcNow.ToString("HH:mm"),
@@ -57,14 +58,12 @@ namespace Connect2Deal.Hubs
             });
 
             var otherUserId = await _chatService.GetOtherUserId(conversationId, userId);
-
             if (otherUserId == null)
             {
                 return;
             }
 
             await Clients.Group($"user-{otherUserId}").SendAsync("InboxUpdate", new { conversationId });
-
         }
 
         public async Task MarkRead(int conversationId)

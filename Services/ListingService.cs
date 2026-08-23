@@ -360,6 +360,41 @@ namespace Connect2Deal.Services
         #endregion
 
 
+        #region Report listings
+
+        public async Task<bool> CreateReport(int listingId, int reporterId, string reason)
+        {
+            bool listingExists = await mycontext.Listings
+                .AnyAsync(l => l.Id == listingId && l.UserId != reporterId);
+
+            if (!listingExists)
+            {
+                return false;
+            }
+
+            bool alreadyReported = await mycontext.Reports
+                .AnyAsync(r => r.ListingId == listingId && r.ReporterId == reporterId);
+
+            if (alreadyReported)
+            {
+                return false;
+            }
+
+            var report = new Report
+            {
+                ListingId = listingId,
+                ReporterId = reporterId,
+                Reason = reason
+            };
+
+            mycontext.Reports.Add(report);
+            await mycontext.SaveChangesAsync();
+
+            return true;
+        }
+
+        #endregion
+
     }
 
 

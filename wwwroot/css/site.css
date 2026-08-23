@@ -2551,3 +2551,105 @@ img.c2d-rate-avatar {
         padding-top: 6px;
         border-top: 1px solid rgba(0, 0, 0, .1);
     }
+
+
+/* ===== Report listing ===== */
+.c2d-report-btn {
+    padding: 9px 16px;
+    border: 1.5px solid #e2e4f2;
+    border-radius: 11px;
+    background: none;
+    color: #7a7f9a;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .13s;
+}
+
+    .c2d-report-btn:hover {
+        border-color: #e11d48;
+        color: #e11d48;
+    }
+
+.c2d-report-form {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #eceef6;
+    border-radius: 14px;
+    background: #f8f9fe;
+}
+
+    .c2d-report-form.is-hidden {
+        display: none;
+    }
+
+.c2d-report-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #43485f;
+}
+
+.c2d-report-select,
+.c2d-report-text {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid #dfe2f0;
+    border-radius: 11px;
+    font: inherit;
+    font-size: .9rem;
+    background: #fff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.c2d-report-text {
+    margin-top: 10px;
+    resize: vertical;
+}
+
+    .c2d-report-select:focus,
+    .c2d-report-text:focus {
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+    }
+
+.c2d-report-msg {
+    color: #e11d48;
+    font-size: .8rem;
+    margin-top: 8px;
+    min-height: 1em;
+}
+
+.c2d-report-send {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    border: none;
+    border-radius: 11px;
+    background: #e11d48;
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+    .c2d-report-send:hover {
+        background: #be123c;
+    }
+
+    .c2d-report-send:disabled {
+        opacity: .55;
+        cursor: default;
+    }
+
+.c2d-report-done {
+    text-align: center;
+    color: #047857;
+    font-size: .9rem;
+    font-weight: 600;
+    padding: 8px 0;
+}

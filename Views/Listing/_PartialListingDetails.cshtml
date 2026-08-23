@@ -19,21 +19,16 @@
         <img id="c2d-main-slider-img" src="@images[0].ImagePath" alt="@Model.Title"
              style="width:100%; height:100%; object-fit:cover; border-radius:22px 22px 0 0; cursor: pointer;"
              onclick="
-            var fs = document.getElementById('c2d-fs-overlay');
-            var container = this.closest('.c2d-slider-container');
-
-            // Pokušaj da nađeš strelicu, ako ne postoji (1 slika), podrazumevana vrednost je 0
-            var arrow = container ? container.querySelector('.c2d-slider-arrow') : null;
-            var current = arrow ? parseInt(arrow.getAttribute('data-current')) : 0;
-
-            // Izvlačimo niz slika direktno iz data-images atributa sa overlay-a koji uvek postoji
-            var imgs = JSON.parse(fs.getAttribute('data-images'));
-
-            fs.setAttribute('data-current', current);
-            fs.querySelector('#c2d-fs-img').src = imgs[current];
-            fs.querySelector('#c2d-fs-index').innerText = current + 1;
-            fs.style.display = 'flex';
-         " />
+                var fs = document.getElementById('c2d-fs-overlay');
+                var container = this.closest('.c2d-slider-container');
+                var arrow = container ? container.querySelector('.c2d-slider-arrow') : null;
+                var current = arrow ? parseInt(arrow.getAttribute('data-current')) : 0;
+                var imgs = JSON.parse(fs.getAttribute('data-images'));
+                fs.setAttribute('data-current', current);
+                fs.querySelector('#c2d-fs-img').src = imgs[current];
+                fs.querySelector('#c2d-fs-index').innerText = current + 1;
+                fs.style.display = 'flex';
+             " />
 
         <span class="c2d-detail-cat">@cat</span>
 
@@ -47,15 +42,15 @@
                     data-images="@jsonImages"
                     data-current="0"
                     onclick="
-                                        var imgs = JSON.parse(this.getAttribute('data-images'));
-                                        var current = parseInt(this.getAttribute('data-current'));
-                                        current = (current - 1 + imgs.length) % imgs.length;
-                                        this.setAttribute('data-current', current);
-                                        this.nextElementSibling.setAttribute('data-current', current);
-                                        var container = this.closest('.c2d-slider-container');
-                                        container.querySelector('#c2d-main-slider-img').src = imgs[current];
-                                        container.querySelector('#c2d-slider-index').innerText = current + 1;
-                                    "
+                                var imgs = JSON.parse(this.getAttribute('data-images'));
+                                var current = parseInt(this.getAttribute('data-current'));
+                                current = (current - 1 + imgs.length) % imgs.length;
+                                this.setAttribute('data-current', current);
+                                this.nextElementSibling.setAttribute('data-current', current);
+                                var container = this.closest('.c2d-slider-container');
+                                container.querySelector('#c2d-main-slider-img').src = imgs[current];
+                                container.querySelector('#c2d-slider-index').innerText = current + 1;
+                            "
                     style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;">
                 &#10094;
             </button>
@@ -64,15 +59,15 @@
                     data-images="@jsonImages"
                     data-current="0"
                     onclick="
-                                        var imgs = JSON.parse(this.getAttribute('data-images'));
-                                        var current = parseInt(this.getAttribute('data-current'));
-                                        current = (current + 1) % imgs.length;
-                                        this.setAttribute('data-current', current);
-                                        this.previousElementSibling.setAttribute('data-current', current);
-                                        var container = this.closest('.c2d-slider-container');
-                                        container.querySelector('#c2d-main-slider-img').src = imgs[current];
-                                        container.querySelector('#c2d-slider-index').innerText = current + 1;
-                                    "
+                                var imgs = JSON.parse(this.getAttribute('data-images'));
+                                var current = parseInt(this.getAttribute('data-current'));
+                                current = (current + 1) % imgs.length;
+                                this.setAttribute('data-current', current);
+                                this.previousElementSibling.setAttribute('data-current', current);
+                                var container = this.closest('.c2d-slider-container');
+                                container.querySelector('#c2d-main-slider-img').src = imgs[current];
+                                container.querySelector('#c2d-slider-index').innerText = current + 1;
+                            "
                     style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;">
                 &#10095;
             </button>
@@ -195,6 +190,18 @@ else
                 <div class="c2d-detail-seller-name">@(Model.User?.Username ?? "Unknown")</div>
                 <div class="c2d-detail-seller-since">Member since @(Model.User?.CreatedAt.ToString("MMM yyyy"))</div>
             </div>
+
+            @if (User.Identity != null && User.Identity.IsAuthenticated && Model.User != null)
+            {
+                var myId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier));
+                if (myId != Model.UserId)
+                {
+                    <button type="button" class="c2d-report-btn" data-report-listing="@Model.Id">
+                        Report
+                    </button>
+                }
+            }
+
             <button type="button" class="c2d-view-seller"
                     data-seller-id="@Model.UserId"
                     data-listing-id="@Model.Id">
@@ -205,9 +212,8 @@ else
 
     @if (User.Identity != null && User.Identity.IsAuthenticated && Model.User != null)
     {
-        var myId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier));
-
-        if (myId != Model.UserId)
+        var msgId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier));
+        if (msgId != Model.UserId)
         {
             <div class="c2d-detail-actions">
                 <a class="c2d-detail-msg"
@@ -239,6 +245,21 @@ else
                 })
                 .catch(function () {
                     alert('Could not load seller profile. Please try again.');
+                });
+        });
+    })();
+
+    (function () {
+        const reportBtn = document.querySelector('[data-report-listing]');
+        if (!reportBtn) return;
+
+        reportBtn.addEventListener('click', function () {
+            const id = reportBtn.getAttribute('data-report-listing');
+
+            fetch('/Listing/ReportListingForm?listingId=' + id)
+                .then(function (res) { return res.text(); })
+                .then(function (html) {
+                    window.c2dSetModalContent(html);
                 });
         });
     })();

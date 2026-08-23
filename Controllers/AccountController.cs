@@ -103,10 +103,17 @@ namespace Connect2Deal.Controllers
                 return View(model);
             }
 
+            if (user.IsBlocked)
+            {
+                ModelState.AddModelError("Username", "This account has been blocked.");
+                return View(model);
+            }
+
             var claims = new List<Claim>
     {
         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
         new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Role, user.Role),
         new Claim("CoockieUserId", user.Id.ToString()),
         new Claim("ProfileImage", user.ProfileImage ?? "")
     };
@@ -129,7 +136,7 @@ namespace Connect2Deal.Controllers
         #endregion
 
         [HttpPost]
-        public async Task <IActionResult> Logout()
+        public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
@@ -207,6 +214,7 @@ namespace Connect2Deal.Controllers
              {
         new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
              new Claim(ClaimTypes.Name, User.Identity!.Name ?? ""),
+        new Claim(ClaimTypes.Role, User.FindFirstValue(ClaimTypes.Role) ?? "User"),
         new Claim("CoockieUserId", userId.ToString()),
                  new Claim("ProfileImage", newPath)
               };

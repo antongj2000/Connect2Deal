@@ -1,4 +1,5 @@
-﻿using Connect2Deal.Services;
+﻿using Connect2Deal.Constants;
+using Connect2Deal.Services;
 using Connect2Deal.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -173,6 +174,38 @@ namespace Connect2Deal.Controllers
         }
 
 
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReportListing(int listingId, string reason, string? details)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            if (!ReportReasons.All.Contains(reason))
+            {
+                return BadRequest();
+            }
+
+            var fullReason = string.IsNullOrWhiteSpace(details)
+                ? reason
+                : $"{reason}: {details.Trim()}";
+
+            if (fullReason.Length > 255)
+            {
+                fullReason = fullReason.Substring(0, 255);
+            }
+
+            bool ok = await _listingService.CreateReport(listingId, userId, fullReason);
+
+            if (!ok)
+            {
+                return Json(new { success = false, message = "You have already reported this listing." });
+            }
+
+            return Json(new { success = true });
+        }
+
+
 
         #endregion
 
@@ -220,16 +253,17 @@ namespace Connect2Deal.Controllers
 
         #endregion
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult ReportListingForm(int listingId)
+        {
+            return PartialView("_ReportListing", listingId);
+        }
 
 
 
-        #region Filtriranje oglasa
-       
 
 
-
-
-        #endregion
 
     }
 }

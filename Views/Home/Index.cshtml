@@ -14,7 +14,10 @@
 
 <div class="c2d-shell" id="c2dShell">
 
-    <partial name="_Sidebar" />
+    
+    @Html.AntiForgeryToken()
+
+<partial name="_Sidebar" />
 
     <main class="c2d-main">
 

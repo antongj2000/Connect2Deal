@@ -1,0 +1,65 @@
+﻿@model int
+@{
+    var listingId = Model;
+}
+
+<div class="c2d-msgseller">
+
+    <h3 class="c2d-msgseller-title">Report listing</h3>
+
+    <div class="c2d-msgseller-label">What's wrong with this listing?</div>
+
+    <form id="reportListingForm">
+        <input type="hidden" name="listingId" value="@listingId" />
+
+        <select name="reason" class="c2d-report-select" style="margin-bottom: 10px;">
+            @foreach (var r in Connect2Deal.Constants.ReportReasons.All)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+
+        <textarea name="details" class="c2d-report-text" rows="3"
+                  placeholder="Additional details (optional)"></textarea>
+
+        <div class="c2d-report-msg" id="reportMsg"></div>
+
+        <button type="submit" class="c2d-msgseller-send">Send report</button>
+    </form>
+
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById('reportListingForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            var btn = form.querySelector('button[type="submit"]');
+            var msg = document.getElementById('reportMsg');
+            btn.disabled = true;
+            msg.textContent = '';
+
+            var body = new FormData(form);
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) body.append('__RequestVerificationToken', token.value);
+
+            try {
+                var res = await fetch('/Listing/ReportListing', { method: 'POST', body: body });
+                var data = await res.json();
+
+                if (data.success) {
+                    form.innerHTML = '<div class="c2d-report-done">Report sent. Thank you.</div>';
+                } else {
+                    msg.textContent = data.message || 'Could not send the report.';
+                    btn.disabled = false;
+                }
+            } catch {
+                msg.textContent = 'Could not send the report.';
+                btn.disabled = false;
+            }
+        });
+    })();
+</script>

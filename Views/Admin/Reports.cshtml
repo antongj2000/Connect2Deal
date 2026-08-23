@@ -1,0 +1,184 @@
+﻿@model IEnumerable<Connect2Deal.Models.Report>
+@{
+    ViewData["Title"] = "Reported Listings";
+    ViewData["HideChrome"] = true;
+    ViewData["ActivePage"] = "AdminReports";
+}
+
+<div class="c2d-shell" id="c2dShell">
+
+    <partial name="_Sidebar" />
+
+    <main class="c2d-main">
+
+        <header class="c2d-topbar">
+            <div class="c2d-topbar-left">
+                <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+                <div>
+                    <h1 class="c2d-title">Reported Listings</h1>
+                    <p class="c2d-subtitle">Review and manage reported items</p>
+                </div>
+            </div>
+        </header>
+
+        @Html.AntiForgeryToken()
+
+        <div class="c2d-card">
+            <table class="c2d-table">
+                <thead>
+                    <tr>
+                        <th>Listing</th>
+                        <th>Reported By</th>
+                        <th>Reason</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="report-row-@item.Id">
+                            <td>
+                                @if (item.Listing != null)
+                                {
+                                    <strong>@item.Listing.Title</strong>
+                                    <br />
+                                    <small>Status: <span id="status-@item.ListingId">@item.Listing.Status</span></small>
+                                }
+                                else
+                                {
+                                    <span style="color:#7a7f9a;">Listing removed</span>
+                                }
+                            </td>
+                            <td>@(item.Reporter?.Username ?? "Unknown")</td>
+                            <td>@item.Reason</td>
+                            <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    @if (item.Listing != null)
+                                    {
+                                        <button type="button" class="c2d-view"
+                                                data-detail-id="@item.ListingId">
+                                            View
+                                        </button>
+
+                                        <button type="button" class="c2d-review-more"
+                                                style="margin:0; padding:6px 12px; width:auto;"
+                                                data-warn-listing="@item.ListingId">
+                                            Deactivate
+                                        </button>
+                                    }
+                                    <button type="button" class="c2d-report-btn"
+                                            style="padding:6px 12px;"
+                                            data-dismiss-report="@item.Id">
+                                        Dismiss
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div style="text-align:center; padding:40px; color:#7a7f9a;">
+                    No reports yet.
+                </div>
+            }
+        </div>
+
+    </main>
+
+    <!-- ============ DETAIL MODAL ============ -->
+    <div class="c2d-modal-overlay" id="c2dModal">
+        <div class="c2d-modal">
+            <button class="c2d-modal-close" id="c2dModalClose">✕</button>
+            <div class="c2d-modal-content" id="c2dModalContent">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            var modal = document.getElementById('c2dModal');
+            var modalBody = document.getElementById('c2dModalContent');
+
+            function setModalContent(html) {
+                modalBody.innerHTML = html;
+                modalBody.querySelectorAll('script').forEach(function (old) {
+                    var s = document.createElement('script');
+                    s.textContent = old.textContent;
+                    old.replaceWith(s);
+                });
+            }
+
+            window.c2dSetModalContent = setModalContent;
+
+            function openModal() {
+                modal.classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+
+            document.getElementById('c2dModalClose').addEventListener('click', closeModal);
+            modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+            document.addEventListener('click', async function (e) {
+
+                // View listing details
+                var viewBtn = e.target.closest('[data-detail-id]');
+                if (viewBtn) {
+                    var id = viewBtn.getAttribute('data-detail-id');
+                    modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                    openModal();
+
+                    var res = await fetch('/Listing/ListingDetails/' + id);
+                    setModalContent(res.ok
+                        ? await res.text()
+                        : '<div class="c2d-modal-loading">Listing not found.</div>');
+                    return;
+                }
+
+                // Deactivate with warning
+                var warnBtn = e.target.closest('[data-warn-listing]');
+                if (warnBtn) {
+                    var wid = warnBtn.getAttribute('data-warn-listing');
+                    modalBody.innerHTML = '<div class="c2d-modal-loading">Loading...</div>';
+                    openModal();
+
+                    var res2 = await fetch('/Admin/WarnForm?listingId=' + wid);
+                    setModalContent(res2.ok
+                        ? await res2.text()
+                        : '<div class="c2d-modal-loading">Could not load.</div>');
+                    return;
+                }
+
+                // Dismiss report
+                var dismissBtn = e.target.closest('[data-dismiss-report]');
+                if (dismissBtn) {
+                    var rid = dismissBtn.getAttribute('data-dismiss-report');
+                    var body = new FormData();
+                    body.append('reportId', rid);
+                    body.append('__RequestVerificationToken', token);
+
+                    var res3 = await fetch('/Admin/DismissReport', { method: 'POST', body: body });
+                    if (res3.ok) {
+                        document.getElementById('report-row-' + rid).remove();
+                    }
+                }
+            });
+        })();
+    </script>
+}

@@ -1,0 +1,150 @@
+﻿@model IEnumerable<Connect2Deal.Models.User>
+@{
+    ViewData["Title"] = "User Management";
+    ViewData["HideChrome"] = true;
+    ViewData["ActivePage"] = "AdminUsers";
+}
+<div class="c2d-shell" id="c2dShell">
+    <partial name="_Sidebar" />
+    <main class="c2d-main">
+        <header class="c2d-topbar">
+            <div class="c2d-topbar-left">
+                <button class="c2d-burger" id="c2dBurger" aria-label="Toggle menu">
+                    <span></span><span></span><span></span>
+                </button>
+                <div>
+                    <h1 class="c2d-title">User Management</h1>
+                    <p class="c2d-subtitle">Control accounts and block users</p>
+                </div>
+            </div>
+        </header>
+        @Html.AntiForgeryToken()
+
+        <div style="margin-bottom:18px;">
+            <input type="text" id="userSearch" class="c2d-filter-search"
+                   placeholder="Search by username..."
+                   style="max-width:340px;" />
+        </div>
+
+        <div class="c2d-card">
+            <table class="c2d-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    @foreach (var user in Model)
+                    {
+                        <tr data-username="@user.Username.ToLower()">
+                            <td>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    @if (!string.IsNullOrEmpty(user.ProfileImage))
+                                    {
+                                        <img class="c2d-review-avatar" src="@user.ProfileImage" alt="@user.Username"
+                                             style="object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="c2d-review-avatar">
+                                            @(user.Username.Length > 0 ? user.Username.Substring(0, 1).ToUpper() : "?")
+                                        </div>
+                                    }
+                                    <span style="font-weight:600;">@user.Username</span>
+                                </div>
+                            </td>
+                            <td>@user.Email</td>
+                            <td>@user.Role</td>
+                            <td>
+                                <span id="user-status-@user.Id"
+                                      style="font-weight:600; color:@(user.IsBlocked ? "#e11d48" : "#047857");">
+                                    @(user.IsBlocked ? "Blocked" : "Active")
+                                </span>
+                            </td>
+                            <td>
+                                @if (user.Role != "Admin")
+                                {
+                                    <button type="button"
+                                            id="btn-user-@user.Id"
+                                            class="@(user.IsBlocked ? "c2d-review-more" : "c2d-report-btn")"
+                                            style="margin:0; padding:6px 14px; width:auto;"
+                                            data-toggle-user="@user.Id">
+                                        @(user.IsBlocked ? "Unblock" : "Block")
+                                    </button>
+                                }
+                                else
+                                {
+                                    <span style="color:#7a7f9a;">System Admin</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div id="noUsersFound" style="display:none; text-align:center; padding:30px; color:#7a7f9a;">
+                No users match that search.
+            </div>
+        </div>
+    </main>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // ---- pretraga po username-u ----
+            const search = document.getElementById('userSearch');
+            const rows = document.querySelectorAll('#userTableBody tr');
+            const empty = document.getElementById('noUsersFound');
+
+            search.addEventListener('input', function () {
+                const term = search.value.trim().toLowerCase();
+                let visible = 0;
+
+                rows.forEach(function (row) {
+                    const match = row.getAttribute('data-username').includes(term);
+                    row.style.display = match ? '' : 'none';
+                    if (match) visible++;
+                });
+
+                empty.style.display = visible === 0 ? 'block' : 'none';
+            });
+
+            // ---- blokiranje / deblokiranje ----
+            document.addEventListener('click', async function (e) {
+                var btn = e.target.closest('[data-toggle-user]');
+                if (!btn) return;
+
+                var userId = btn.getAttribute('data-toggle-user');
+                var body = new FormData();
+                body.append('userId', userId);
+                body.append('__RequestVerificationToken', token);
+
+                var res = await fetch('/Admin/ToggleUserBlock', { method: 'POST', body: body });
+                if (!res.ok) return;
+
+                var data = await res.json();
+                var status = document.getElementById('user-status-' + userId);
+
+                if (data.isBlocked) {
+                    status.textContent = 'Blocked';
+                    status.style.color = '#e11d48';
+                    btn.className = 'c2d-review-more';
+                    btn.textContent = 'Unblock';
+                } else {
+                    status.textContent = 'Active';
+                    status.style.color = '#047857';
+                    btn.className = 'c2d-report-btn';
+                    btn.textContent = 'Block';
+                }
+                btn.style.cssText = 'margin:0; padding:6px 14px; width:auto;';
+            });
+        })();
+    </script>
+}

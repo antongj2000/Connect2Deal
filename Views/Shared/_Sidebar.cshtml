@@ -87,6 +87,20 @@
                asp-controller="Account" asp-action="Settings">
                 <span class="c2d-nav-ico">⚙</span> Settings
             </a>
+
+            @* --- ADMIN SEKCIJA --- *@
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="c2d-nav-label">Administration</div>
+                <a class="c2d-nav-item @(activePage == "AdminReports" ? "is-active" : "")"
+                   asp-controller="Admin" asp-action="Reports">
+                    <span class="c2d-nav-ico">⚑</span> Reported Listings
+                </a>
+                <a class="c2d-nav-item @(activePage == "AdminUsers" ? "is-active" : "")"
+                   asp-controller="Admin" asp-action="Users">
+                    <span class="c2d-nav-ico">👥</span> Manage Users
+                </a>
+            }
         }
     </nav>
     <div class="c2d-sidebar-foot">

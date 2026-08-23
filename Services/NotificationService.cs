@@ -105,5 +105,26 @@ namespace Connect2Deal.Services
 
         #endregion
 
+
+
+        #region Admin warrning
+
+        public async Task CreateAdminWarning(int userId, int listingId, string message)
+        {
+            var notification = new Notification
+            {
+                UserId = userId,
+                Type = NotificationTypes.AdminWarning,
+                Message = message,
+                RelatedId = listingId
+            };
+
+            mycontext.Notifications.Add(notification);
+            await mycontext.SaveChangesAsync();
+
+            await _hub.Clients.Group($"user-{userId}").SendAsync("NotificationUpdate");
+        }
+
+        #endregion
     }
 }

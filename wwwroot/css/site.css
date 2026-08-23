@@ -2653,3 +2653,71 @@ img.c2d-rate-avatar {
     font-weight: 600;
     padding: 8px 0;
 }
+
+/* ===== Admin & Table Styles ===== */
+.c2d-card {
+    background: #fff;
+    border: 1px solid #eceef6;
+    border-radius: 16px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.c2d-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+    .c2d-table th {
+        font-size: .78rem;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: #7a7f9a;
+        padding: 12px 14px;
+        border-bottom: 1px solid #eceef6;
+    }
+
+    .c2d-table td {
+        padding: 14px;
+        border-bottom: 1px solid #f5f6fb;
+        font-size: .9rem;
+        color: #3a3e54;
+        vertical-align: middle;
+    }
+
+.c2d-badge {
+    background: #f3f4fb;
+    color: #4f46e5;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.c2d-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+    .c2d-status-badge.is-active {
+        background: #ecfdf5;
+        color: #047857;
+    }
+
+    .c2d-status-badge.is-blocked {
+        background: #ffe4e6;
+        color: #e11d48;
+    }
+
+.c2d-link {
+    color: #171a2b;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .c2d-link:hover {
+        color: #4f46e5;
+    }

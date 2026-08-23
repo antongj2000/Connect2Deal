@@ -1,0 +1,55 @@
+﻿@model Connect2Deal.Models.Listing
+
+<div class="c2d-msgseller">
+
+    <h3 class="c2d-msgseller-title">Deactivate listing</h3>
+
+    <div class="c2d-msgseller-label">Listing</div>
+    <div class="c2d-msgseller-listing">
+        <div class="c2d-msgseller-info">
+            <div class="c2d-msgseller-name">@Model.Title</div>
+            <div class="c2d-msgseller-price">@(Model.User?.Username ?? "Unknown")</div>
+        </div>
+    </div>
+
+    <form id="warnForm">
+        <input type="hidden" name="listingId" value="@Model.Id" />
+
+        <label class="c2d-msgseller-label" for="warnMessage">Message to the seller</label>
+        <textarea id="warnMessage" name="message" class="c2d-msgseller-text" rows="5">Your listing "@Model.Title" has been deactivated because it does not comply with our community guidelines. Please review it and contact support if you believe this was a mistake.</textarea>
+
+        <div class="c2d-report-msg" id="warnMsg"></div>
+
+        <button type="submit" class="c2d-msgseller-send">Deactivate and send</button>
+    </form>
+
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById('warnForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            var btn = form.querySelector('button[type="submit"]');
+            var msg = document.getElementById('warnMsg');
+            btn.disabled = true;
+
+            var body = new FormData(form);
+            var token = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (token) body.append('__RequestVerificationToken', token.value);
+
+            try {
+                var res = await fetch('/Admin/DeactivateWithWarning', { method: 'POST', body: body });
+                if (!res.ok) throw new Error('failed');
+
+                location.reload();
+            } catch {
+                msg.textContent = 'Could not complete the action.';
+                btn.disabled = false;
+            }
+        });
+    })();
+</script>

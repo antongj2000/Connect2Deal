@@ -97,7 +97,31 @@ namespace Connect2Deal.Services
 
         #endregion
 
+        #region Edit Listing
 
+        public async Task<bool> UpdateListing(int listingId, int userId, int categoryId, int locationId,
+                                  string title, string description, decimal price)
+        {
+            var listing = await mycontext.Listings.FindAsync(listingId);
+
+            if (listing == null || listing.UserId != userId)
+            {
+                return false;
+            }
+
+            listing.CategoryId = categoryId;
+            listing.LocationId = locationId;
+            listing.Title = title;
+            listing.Description = description;
+            listing.Price = price;
+            listing.UpdatedAt = DateTime.UtcNow;
+
+            await mycontext.SaveChangesAsync();
+            return true;
+        }
+
+
+        #endregion
 
 
 
@@ -268,13 +292,21 @@ namespace Connect2Deal.Services
 
 
 
-        #region Close transaction
-
         public async Task CloseTransaction(int listingId, int buyerId, int sellerId)
         {
-            bool alreadySold = await mycontext.Transactions
-                .AnyAsync(x => x.ListingId == listingId);
-            if (alreadySold)
+            var listing = await mycontext.Listings.FindAsync(listingId);
+            if (listing == null)
+            {
+                return;
+            }
+
+            bool isService = await IsServiceListing(listing.CategoryId);
+
+            bool alreadyClosed = isService
+                ? await mycontext.Transactions.AnyAsync(x => x.ListingId == listingId && x.BuyerId == buyerId)
+                : await mycontext.Transactions.AnyAsync(x => x.ListingId == listingId);
+
+            if (alreadyClosed)
             {
                 return;
             }
@@ -287,33 +319,49 @@ namespace Connect2Deal.Services
             };
             mycontext.Transactions.Add(transaction);
 
-            var listing = await mycontext.Listings.FindAsync(listingId);
-
-            if (listing != null)
+            if (!isService)
             {
                 listing.Status = "Sold";
             }
 
             await mycontext.SaveChangesAsync();
 
+            var message = isService
+                ? $"Your booking for \"{listing.Title}\" has been confirmed. Please rate the provider to help build a trustworthy community."
+                : $"Congratulations on your new \"{listing.Title}\"! We wish you the best using it. Please rate your seller to help build a trustworthy community.";
 
             var notification = new Notification()
             {
                 UserId = buyerId,
                 Type = NotificationTypes.RateSeller,
-                Message = $"Congratulations on your new \"{listing.Title}\"! We wish you the best using it. Please rate your seller to help build a trustworthy community.",
+                Message = message,
                 RelatedId = transaction.Id
             };
 
             mycontext.Notifications.Add(notification);
             await mycontext.SaveChangesAsync();
-
         }
 
 
+        public async Task<List<int>> GetExistingBuyerIds(int listingId)
+        {
+            return await mycontext.Transactions
+                .Where(t => t.ListingId == listingId)
+                .Select(t => t.BuyerId)
+                .ToListAsync();
+        }
 
+        public async Task<bool> IsServiceListing(int categoryId)
+        {
+            var category = await mycontext.Categories.FindAsync(categoryId);
+            if (category?.ParentId == null)
+            {
+                return false;
+            }
 
-        #endregion
+            return await mycontext.Categories
+                .AnyAsync(p => p.Id == category.ParentId && p.Slug == CategorySlugs.Services);
+        }
 
 
 

@@ -1,7 +1,9 @@
 ﻿@model Connect2Deal.ViewModels.Listing
 
 @{
-    ViewData["Title"] = "Post a listing";
+    bool isEdit = Model.Id > 0;
+
+    ViewData["Title"] = isEdit ? "Edit listing" : "Post a listing";
     ViewData["HideChrome"] = true;
     ViewData["ActivePage"] = "";
 }
@@ -18,8 +20,12 @@
                     <span></span><span></span><span></span>
                 </button>
                 <div>
-                    <h1 class="c2d-title">Post a listing</h1>
-                    <p class="c2d-subtitle">Fill in the details — your item goes live for 10 days.</p>
+                    <h1 class="c2d-title">@(isEdit ? "Edit listing" : "Post a listing")</h1>
+                    <p class="c2d-subtitle">
+                        @(isEdit
+                                                ? "Update the details of your listing. Photos cannot be changed here."
+                                                : "Fill in the details — your item goes live for 10 days.")
+                    </p>
                 </div>
             </div>
         </header>
@@ -27,7 +33,12 @@
         <div class="c2d-form-wrap">
             <div class="c2d-card">
 
-                <form asp-action="CreateListing" method="post" enctype="multipart/form-data">
+                <form asp-action="@(isEdit ? "EditListing" : "CreateListing")" method="post" enctype="multipart/form-data">
+
+                    @if (isEdit)
+                    {
+                        <input type="hidden" asp-for="Id" />
+                    }
 
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label fw-semibold"></label>
@@ -101,32 +112,39 @@
                         <span asp-validation-for="Description" class="text-danger small"></span>
                     </div>
 
-                    <!-- MODERN IMAGE UPLOAD -->
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Images</label>
+                    @if (!isEdit)
+                    {
+                        <!-- MODERN IMAGE UPLOAD -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Images</label>
 
-                        <div class="image-upload-box" id="dropZone">
-                            <input type="file"
-                                   id="imageInput"
-                                   name="images"
-                                   multiple
-                                   accept="image/*"
-                                   hidden />
-                            <div class="upload-content">
-                                <i class="bi bi-cloud-arrow-up fs-1"></i>
-                                <p class="mb-1">
-                                    <strong>Click to upload</strong> or drag images here
-                                </p>
-                                <small class="text-muted">PNG, JPG up to 5MB each</small>
+                            <div class="image-upload-box" id="dropZone">
+                                <input type="file"
+                                       id="imageInput"
+                                       name="images"
+                                       multiple
+                                       accept="image/*"
+                                       hidden />
+                                <div class="upload-content">
+                                    <i class="bi bi-cloud-arrow-up fs-1"></i>
+                                    <p class="mb-1">
+                                        <strong>Click to upload</strong> or drag images here
+                                    </p>
+                                    <small class="text-muted">PNG, JPG up to 5MB each</small>
+                                </div>
                             </div>
-                        </div>
 
-                        <div id="previewContainer" class="image-preview-container mt-3"></div>
-                    </div>
+                            <div id="previewContainer" class="image-preview-container mt-3"></div>
+                        </div>
+                    }
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary px-4">Publish listing</button>
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            @(isEdit ? "Save changes" : "Publish listing")
+                        </button>
+                        <a asp-controller="Home" asp-action="Index"
+                           asp-route-mylistings="@(isEdit ? "true" : null)"
+                           class="btn btn-outline-secondary">Cancel</a>
                     </div>
 
                 </form>
@@ -183,49 +201,52 @@
         chain('parentCategory', 'childCategory', '/Listing/SubCategories');
         chain('country', 'city', '/Listing/Cities');
 
-        // IMAGE UPLOAD
+        // IMAGE UPLOAD (only present when creating a new listing)
         const dropZone = document.getElementById("dropZone");
-        const imageInput = document.getElementById("imageInput");
-        const previewContainer = document.getElementById("previewContainer");
 
-        dropZone.addEventListener("click", () => {
-            imageInput.click();
-        });
+        if (dropZone) {
+            const imageInput = document.getElementById("imageInput");
+            const previewContainer = document.getElementById("previewContainer");
 
-        imageInput.addEventListener("change", () => {
-            showPreview(imageInput.files);
-        });
-
-        dropZone.addEventListener("dragover", e => {
-            e.preventDefault();
-            dropZone.classList.add("border-primary");
-        });
-
-        dropZone.addEventListener("dragleave", () => {
-            dropZone.classList.remove("border-primary");
-        });
-
-        dropZone.addEventListener("drop", e => {
-            e.preventDefault();
-            imageInput.files = e.dataTransfer.files;
-            showPreview(e.dataTransfer.files);
-        });
-
-        function showPreview(files) {
-            previewContainer.innerHTML = "";
-
-            [...files].forEach(file => {
-                if (!file.type.startsWith("image/")) return;
-
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.className = "image-preview";
-                    previewContainer.appendChild(img);
-                };
-                reader.readAsDataURL(file);
+            dropZone.addEventListener("click", () => {
+                imageInput.click();
             });
+
+            imageInput.addEventListener("change", () => {
+                showPreview(imageInput.files);
+            });
+
+            dropZone.addEventListener("dragover", e => {
+                e.preventDefault();
+                dropZone.classList.add("border-primary");
+            });
+
+            dropZone.addEventListener("dragleave", () => {
+                dropZone.classList.remove("border-primary");
+            });
+
+            dropZone.addEventListener("drop", e => {
+                e.preventDefault();
+                imageInput.files = e.dataTransfer.files;
+                showPreview(e.dataTransfer.files);
+            });
+
+            function showPreview(files) {
+                previewContainer.innerHTML = "";
+
+                [...files].forEach(file => {
+                    if (!file.type.startsWith("image/")) return;
+
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement("img");
+                        img.src = e.target.result;
+                        img.className = "image-preview";
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
         }
 
         // ENABLE SELECTS BEFORE SUBMIT

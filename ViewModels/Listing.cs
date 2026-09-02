@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Http;
         public class Listing
         {
 
+        public int Id { get; set; }
 
-            [Required]
+
+        [Required]
             [StringLength(30, MinimumLength = 2)]
             public string Title { get; set; } = string.Empty;
 

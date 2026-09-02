@@ -2721,3 +2721,26 @@ img.c2d-rate-avatar {
     .c2d-link:hover {
         color: #4f46e5;
     }
+
+.c2d-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 1.5px solid #e2e4f2;
+    border-radius: 11px;
+    background: none;
+    color: #4f46e5;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .13s;
+}
+
+    .c2d-edit-btn:hover {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        color: #fff;
+        text-decoration: none;
+    }

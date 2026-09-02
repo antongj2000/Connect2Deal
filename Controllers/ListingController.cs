@@ -4,6 +4,7 @@ using Connect2Deal.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace Connect2Deal.Controllers
@@ -76,6 +77,86 @@ namespace Connect2Deal.Controllers
 
                 return RedirectToAction("Index", "Home");
             }
+
+        [HttpGet]
+        public async Task<IActionResult> EditListing(int id)
+        {
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var listing = await _listingService.GetListingById(id);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            if (listing.UserId != userId)
+            {
+                return Forbid();
+            }
+
+            var model = new Listing
+            {
+                Id = listing.Id,
+                Title = listing.Title,
+                Description = listing.Description,
+                Price = listing.Price ?? 0,
+                ParentCategory = listing.Category?.ParentId ?? 0,
+                ChildCategory = listing.CategoryId,
+                Country = listing.Location?.ParentId ?? 0,
+                City = listing.LocationId,
+                ParentCategories = await BuildParentCategoryList(),
+                Countries = await BuildParentLocationList()
+            };
+
+            model.ChildCategories = await BuildChildCategoryList(model.ParentCategory);
+            model.Cities = await BuildChildLocationList(model.Country);
+
+            return View("CreateListing", model);
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditListing(Listing model)
+        {
+            if (!await _listingService.IsCategoryValid(model.ParentCategory, model.ChildCategory))
+                ModelState.AddModelError(nameof(model.ChildCategory), "Invalid sub-category.");
+
+            if (!await _listingService.IsLocationValid(model.Country, model.City))
+                ModelState.AddModelError(nameof(model.City), "Invalid city.");
+
+            if (!ModelState.IsValid)
+            {
+                model.ParentCategories = await BuildParentCategoryList();
+                model.ChildCategories = await BuildChildCategoryList(model.ParentCategory);
+                model.Countries = await BuildParentLocationList();
+                model.Cities = await BuildChildLocationList(model.Country);
+                return View(model);
+            }
+
+            int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            bool ok = await _listingService.UpdateListing(
+                model.Id,
+                userId,
+                model.ChildCategory,
+                model.City,
+                model.Title,
+                model.Description,
+                model.Price);
+
+            if (!ok)
+            {
+                return Forbid();
+            }
+
+            return RedirectToAction("Index", "Home", new { mylistings = true });
+        }
+
+
+
 
 
         private async Task<List<SelectListItem>> BuildParentLocationList()
@@ -235,14 +316,31 @@ namespace Connect2Deal.Controllers
             return Json(new { success = true });
         }
 
-        [HttpGet]   
+      
+
+
+        [HttpGet]
         public async Task<IActionResult> SelectBuyer(int listingId)
         {
             int userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var listing = await _listingService.GetListingById(listingId);
+            if (listing == null)
+            {
+                return NotFound();
+            }
+
+            if (listing.UserId != userId)
+            {
+                return Forbid();
+            }
+
             var conversations = await _chatService.GetConversations(userId);
 
             ViewBag.ListingId = listingId;
-            ViewBag.SellerId = userId; 
+            ViewBag.SellerId = userId;
+            ViewBag.IsService = await _listingService.IsServiceListing(listing.CategoryId);
+            ViewBag.ExistingBuyerIds = await _listingService.GetExistingBuyerIds(listingId);
 
             return PartialView("_SelectBuyer", conversations);
         }

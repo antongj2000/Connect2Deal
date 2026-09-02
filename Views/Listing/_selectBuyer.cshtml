@@ -2,22 +2,42 @@
 @{
     int sellerId = (int)ViewBag.SellerId;
     int listingId = (int)ViewBag.ListingId;
+    bool isService = ViewBag.IsService ?? false;
+    var existingBuyerIds = ViewBag.ExistingBuyerIds as List<int> ?? new List<int>();
+
+    var candidates = Model
+        .Select(c => c.User1Id == sellerId ? c.User2 : c.User1)
+        .Where(u => u != null && !existingBuyerIds.Contains(u.Id))
+        .ToList();
 }
+
 <div class="c2d-buyer-pick">
-    <h3 class="c2d-buyer-title">Select buyer</h3>
-    <p class="c2d-buyer-sub">Choose the person who bought this listing.</p>
-    @if (!Model.Any())
+
+    <h3 class="c2d-buyer-title">@(isService ? "Select client" : "Select buyer")</h3>
+    <p class="c2d-buyer-sub">
+        @(isService
+                ? "Choose the person who used this service. The listing stays active, so you can confirm more clients later."
+                : "Choose the person who bought this listing.")
+    </p>
+
+    @if (!candidates.Any())
     {
         <div class="c2d-buyer-empty">
-            You don't have any conversations yet, so there's no one to pick as a buyer.
+            @if (!Model.Any())
+            {
+                @:You don't have any conversations yet, so there's no one to pick.
+            }
+            else
+            {
+                @:Everyone you have talked to about this listing has already been confirmed.
+            }
         </div>
     }
     else
     {
         <div class="c2d-buyer-list">
-            @foreach (var conv in Model)
+            @foreach (var other in candidates)
             {
-                var other = conv.User1Id == sellerId ? conv.User2 : conv.User1;
                 <button type="button" class="c2d-buyer-item" data-buyer-id="@other.Id">
                     @if (!string.IsNullOrEmpty(other.ProfileImage))
                     {
@@ -32,9 +52,10 @@
                 </button>
             }
         </div>
+
         <button type="button" class="c2d-buyer-confirm" id="c2dBuyerConfirm"
                 data-listing-id="@listingId" disabled>
-            Confirm sale
+            @(isService ? "Confirm completion" : "Confirm sale")
         </button>
     }
 </div>

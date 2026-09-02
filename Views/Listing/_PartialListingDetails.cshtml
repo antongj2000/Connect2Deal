@@ -194,11 +194,20 @@ else
             @if (User.Identity != null && User.Identity.IsAuthenticated && Model.User != null)
             {
                 var myId = int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier));
+
                 if (myId != Model.UserId)
                 {
                     <button type="button" class="c2d-report-btn" data-report-listing="@Model.Id">
                         Report
                     </button>
+                }
+                else
+                {
+                    <a class="c2d-edit-btn" title="Edit listing"
+                       asp-controller="Listing" asp-action="EditListing"
+                       asp-route-id="@Model.Id">
+                        ✎ Edit
+                    </a>
                 }
             }
 

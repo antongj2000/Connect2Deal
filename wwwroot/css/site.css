@@ -64,38 +64,13 @@ body {
    IMAGE UPLOAD — CreateListing drag & drop box
    ============================================================ */
 
-.image-upload-box {
-    border: 2px dashed #ced4da;
-    border-radius: 16px;
-    padding: 35px;
-    text-align: center;
-    cursor: pointer;
-    background: #fafafa;
-    transition: 0.25s ease;
-}
 
-    .image-upload-box:hover {
-        border-color: #0d6efd;
-        background: #f8fbff;
-    }
 
 .upload-content {
     color: #6c757d;
 }
 
-.image-preview-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
 
-.image-preview {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: 12px;
-    border: 1px solid #ddd;
-}
 
 
 /* ============================================================
@@ -2744,3 +2719,166 @@ img.c2d-rate-avatar {
         color: #fff;
         text-decoration: none;
     }
+
+/* ===== Listing form ===== */
+.c2d-form-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* ===== Listing form ===== */
+.c2d-form-section {
+    position: relative;
+    padding: 20px 22px 20px 26px;
+    margin-bottom: 18px;
+    background: #eff4ff;
+    border: 1px solid #dbe4fb;
+    border-left: 4px solid #2563eb;
+    border-radius: 16px;
+}
+
+.c2d-form-section-title {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: #4f46e5;
+    margin-bottom: 16px;
+}
+
+.c2d-form-label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 600;
+    color: #2563eb;
+    margin-bottom: 7px;
+}
+
+.c2d-form-input {
+    width: 100%;
+    padding: 11px 15px;
+    border: 1px solid #dfe2f0;
+    border-radius: 12px;
+    font: inherit;
+    font-size: .92rem;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+textarea.c2d-form-input {
+    resize: vertical;
+}
+
+select.c2d-form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237a7f9a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+    cursor: pointer;
+}
+
+.c2d-form-input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .12);
+}
+
+.c2d-form-input:disabled {
+    background: #f1f2f7;
+    color: #9aa0b5;
+    cursor: not-allowed;
+}
+
+.c2d-price-wrap {
+    position: relative;
+}
+
+    .c2d-price-wrap .c2d-form-input {
+        padding-right: 44px;
+    }
+
+.c2d-price-suffix {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #7a7f9a;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.c2d-form-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.c2d-form-submit {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #fff;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .12s;
+}
+
+    .c2d-form-submit:hover {
+        transform: translateY(-1px);
+    }
+
+.c2d-form-cancel {
+    padding: 12px 24px;
+    border: 1.5px solid #e2e4f2;
+    border-radius: 12px;
+    color: #7a7f9a;
+    font-size: .95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all .13s;
+}
+
+    .c2d-form-cancel:hover {
+        border-color: #4f46e5;
+        color: #4f46e5;
+        text-decoration: none;
+    }
+
+.image-upload-box {
+    padding: 32px;
+    border: 2px dashed #dfe2f0;
+    border-radius: 14px;
+    background: #fff;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+}
+
+    .image-upload-box:hover {
+        border-color: #4f46e5;
+        background: #f5f6fe;
+    }
+
+.image-preview-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-preview {
+    width: 92px;
+    height: 92px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 1px solid #eceef6;
+}
+
+.image-upload-box.is-dragging {
+    border-color: #4f46e5;
+    background: #f0f0fe;
+}

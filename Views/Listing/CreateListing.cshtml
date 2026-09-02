@@ -40,83 +40,94 @@
                         <input type="hidden" asp-for="Id" />
                     }
 
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold"></label>
-                        <input asp-for="Title" class="form-control" placeholder="e.g. iPhone 17 Pro Max, 256GB" />
-                        <span asp-validation-for="Title" class="text-danger small"></span>
-                    </div>
+                    <div class="c2d-form-section">
+                        <div class="c2d-form-section-title">Basic info</div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ParentCategory" class="form-label fw-semibold"></label>
-                            <select asp-for="ParentCategory"
-                                    asp-items="Model.ParentCategories"
-                                    id="parentCategory"
-                                    class="form-select">
-                                <option value="">Choose a category</option>
-                            </select>
-                            <span asp-validation-for="ParentCategory" class="text-danger small"></span>
+                        <div class="mb-3">
+                            <label asp-for="Title" class="c2d-form-label"></label>
+                            <input asp-for="Title" class="c2d-form-input" placeholder="e.g. iPhone 17 Pro Max, 256GB" />
+                            <span asp-validation-for="Title" class="c2d-field-error"></span>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ChildCategory" class="form-label fw-semibold"></label>
-                            <select asp-for="ChildCategory"
-                                    asp-items="Model.ChildCategories"
-                                    id="childCategory"
-                                    class="form-select">
-                                <option value="">Choose a category first</option>
-                            </select>
-                            <span asp-validation-for="ChildCategory" class="text-danger small"></span>
-                        </div>
-                    </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ParentCategory" class="c2d-form-label"></label>
+                                <select asp-for="ParentCategory"
+                                        asp-items="Model.ParentCategories"
+                                        id="parentCategory"
+                                        class="c2d-form-input">
+                                    <option value="">Choose a category</option>
+                                </select>
+                                <span asp-validation-for="ParentCategory" class="c2d-field-error"></span>
+                            </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="Country" class="form-label fw-semibold"></label>
-                            <select asp-for="Country"
-                                    asp-items="Model.Countries"
-                                    id="country"
-                                    class="form-select">
-                                <option value="">Choose a country</option>
-                            </select>
-                            <span asp-validation-for="Country" class="text-danger small"></span>
-                        </div>
-
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="City" class="form-label fw-semibold"></label>
-                            <select asp-for="City"
-                                    asp-items="Model.Cities"
-                                    id="city"
-                                    class="form-select">
-                                <option value="">Choose a country first</option>
-                            </select>
-                            <span asp-validation-for="City" class="text-danger small"></span>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ChildCategory" class="c2d-form-label"></label>
+                                <select asp-for="ChildCategory"
+                                        asp-items="Model.ChildCategories"
+                                        id="childCategory"
+                                        class="c2d-form-input">
+                                    <option value="">Choose a category first</option>
+                                </select>
+                                <span asp-validation-for="ChildCategory" class="c2d-field-error"></span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Price" class="form-label fw-semibold"></label>
-                        <div class="input-group">
-                            <input asp-for="Price" class="form-control" placeholder="0.00" />
-                            <span class="input-group-text">€</span>
+                    <div class="c2d-form-section">
+                        <div class="c2d-form-section-title">Location</div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Country" class="c2d-form-label"></label>
+                                <select asp-for="Country"
+                                        asp-items="Model.Countries"
+                                        id="country"
+                                        class="c2d-form-input">
+                                    <option value="">Choose a country</option>
+                                </select>
+                                <span asp-validation-for="Country" class="c2d-field-error"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="City" class="c2d-form-label"></label>
+                                <select asp-for="City"
+                                        asp-items="Model.Cities"
+                                        id="city"
+                                        class="c2d-form-input">
+                                    <option value="">Choose a country first</option>
+                                </select>
+                                <span asp-validation-for="City" class="c2d-field-error"></span>
+                            </div>
                         </div>
-                        <span asp-validation-for="Price" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Description" class="form-label fw-semibold"></label>
-                        <textarea asp-for="Description"
-                                  class="form-control"
-                                  rows="6"
-                                  placeholder="Condition, age, what's included..."></textarea>
-                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    <div class="c2d-form-section">
+                        <div class="c2d-form-section-title">Price and description</div>
+
+                        <div class="mb-3">
+                            <label asp-for="Price" class="c2d-form-label"></label>
+                            <div class="c2d-price-wrap">
+                                <input asp-for="Price" class="c2d-form-input" placeholder="0.00" />
+                                <span class="c2d-price-suffix">€</span>
+                            </div>
+                            <span asp-validation-for="Price" class="c2d-field-error"></span>
+                        </div>
+
+                        <div class="mb-0">
+                            <label asp-for="Description" class="c2d-form-label"></label>
+                            <textarea asp-for="Description"
+                                      class="c2d-form-input"
+                                      rows="6"
+                                      placeholder="Condition, age, what's included..."></textarea>
+                            <span asp-validation-for="Description" class="c2d-field-error"></span>
+                        </div>
                     </div>
 
                     @if (!isEdit)
                     {
-                        <!-- MODERN IMAGE UPLOAD -->
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold">Images</label>
+                        <div class="c2d-form-section">
+                            <div class="c2d-form-section-title">Photos</div>
 
                             <div class="image-upload-box" id="dropZone">
                                 <input type="file"
@@ -126,7 +137,7 @@
                                        accept="image/*"
                                        hidden />
                                 <div class="upload-content">
-                                    <i class="bi bi-cloud-arrow-up fs-1"></i>
+                                    <div style="font-size:2rem; line-height:1; color:#a8adc0;">⬆</div>
                                     <p class="mb-1">
                                         <strong>Click to upload</strong> or drag images here
                                     </p>
@@ -138,13 +149,13 @@
                         </div>
                     }
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary px-4">
+                    <div class="c2d-form-actions">
+                        <button type="submit" class="c2d-form-submit">
                             @(isEdit ? "Save changes" : "Publish listing")
                         </button>
                         <a asp-controller="Home" asp-action="Index"
                            asp-route-mylistings="@(isEdit ? "true" : null)"
-                           class="btn btn-outline-secondary">Cancel</a>
+                           class="c2d-form-cancel">Cancel</a>
                     </div>
 
                 </form>
@@ -201,7 +212,7 @@
         chain('parentCategory', 'childCategory', '/Listing/SubCategories');
         chain('country', 'city', '/Listing/Cities');
 
-        // IMAGE UPLOAD (only present when creating a new listing)
+        // IMAGE UPLOAD (samo pri kreiranju novog oglasa)
         const dropZone = document.getElementById("dropZone");
 
         if (dropZone) {
@@ -218,15 +229,16 @@
 
             dropZone.addEventListener("dragover", e => {
                 e.preventDefault();
-                dropZone.classList.add("border-primary");
+                dropZone.classList.add("is-dragging");
             });
 
             dropZone.addEventListener("dragleave", () => {
-                dropZone.classList.remove("border-primary");
+                dropZone.classList.remove("is-dragging");
             });
 
             dropZone.addEventListener("drop", e => {
                 e.preventDefault();
+                dropZone.classList.remove("is-dragging");
                 imageInput.files = e.dataTransfer.files;
                 showPreview(e.dataTransfer.files);
             });

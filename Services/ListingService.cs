@@ -247,14 +247,19 @@ namespace Connect2Deal.Services
         }
 
 
-        public async Task<List<Listing>> GetUserFavorites (int userId)
+        public async Task<List<Listing>> GetUserFavorites(int userId)
         {
             var listings = await mycontext.Listings
                 .Include(x => x.Category)
                 .Include(x => x.Location)
                 .Include(x => x.ListingImages)
                 .Include(x => x.Favorites)
-                .Where(x => x.Favorites.Any(f => f.UserId == userId)).ToListAsync();
+                .Where(x => x.Favorites.Any(f => f.UserId == userId))
+                .OrderByDescending(x => x.Status  == "Active")       
+                .ThenByDescending(x => x.Favorites          
+                .Where(f => f.UserId == userId)
+                .Max(f => f.CreatedAt))
+                .ToListAsync();
 
             return listings;
         }

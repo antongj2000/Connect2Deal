@@ -140,7 +140,7 @@
             connection.on("ReceiveMessage", function (msg) {
                 addBubble(msg);
 
-                if (msg.senderId !== myId && document.hasFocus()) {
+                if (msg.senderId !== myId) {
                     connection.invoke("MarkRead", conversationId)
                         .catch(function (err) { console.error(err); });
                 }
